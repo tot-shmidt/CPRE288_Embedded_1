@@ -14,6 +14,7 @@
 // GPIO_PORTE_DATA_R -- Name of the memory mapped register for GPIO Port E, 
 // which is connected to the push buttons
 #include "button.h"
+#include "inc/tm4c123gh6pm.h"
 
 
 /**
@@ -26,12 +27,6 @@ void button_init() {
 	if(initialized){
 		return;
 	}
-
-	// Our stuff:
-	SYSCTL_RCGCGPIO_R = SYSCTL_RCGCGPIO_R | 0x00000010; // 0b0000 0000 0000 0000 0000 0000 0001 0000
-
-	// delete warning after implementing 
-	#warning "Unimplemented function: void button_init()"
 	
 	// Reading: To initialize and configure GPIO PORTE, visit pg. 656 in the 
 	// Tiva datasheet.
@@ -43,16 +38,15 @@ void button_init() {
 	// listed below. You will learn more about additional steps in a later lab.
 
 	// 1) Turn on PORTE system clock, do not modify other clock enables
-	//SYSCTL_RCGCGPIO_R |=
+	SYSCTL_RCGCGPIO_R = SYSCTL_RCGCGPIO_R | 0x00000010; // 0b0000 0000 0000 0000 0000 0000 0001 0000
 
 	// 2) Set the buttons as inputs, do not modify other PORTE wires
-	// GPIO_PORTE_DIR_R &=
+	GPIO_PORTE_DIR_R = GPIO_PORTE_DIR_R & 0b11110000;
 	
 	// 3) Enable digital functionality for button inputs, 
 	//    do not modify other PORTE enables
-	//GPIO_PORTE_DEN_R |=
+	GPIO_PORTE_DEN_R = GPIO_PORTE_DEN_R | 0b00001111;
 
-	
 	initialized = 1;
 }
 
@@ -60,48 +54,29 @@ void button_init() {
 
 /**
  * Returns the position of the rightmost button being pushed.
- * @return the position of the righttmost button being pushed. 4 is the rightmost button, 1 is the leftmost button.  0 indicates no button being pressed
+ * @return the position of the rightmost button being pushed. 4 is the rightmost button, 1 is the leftmost button.  0 indicates no button being pressed
  */
 uint8_t button_getButton() {
+	// Bit 0 = button 1 ; Bit 1 = button 2; Bit 2 = button 3; Bit 3 = button 4.
+    uint8_t buttonPressed = 0;
 
-	#warning "Unimplemented function: uint8_t button_getButton(void)"	// delete warning after implementing
+    if ((GPIO_PORTE_DATA_R & 0b00000001) == 0) {
+        buttonPressed = 1;
+    }
 
-	//
-	// DELETE ME - How bitmasking works
-	// ----------------------------------------
-	// In embedded programming, often we only care about one or a few bits in a piece of 
-	// data.  There are several bitwise operators that we can apply to data in order
-	// to "mask" the bits that we don't care about.
-	//
-	//	| = bitwise OR		& = bitwise AND		^ = bitwise XOR		~ = bitwise NOT
-	//		  << x = shift left by x bits		 >> x = shift right by x bits 
-	//
-	// Let's say we want to know if push button 3 (S3) of GPIO_PORTE_DATA_R is
-	// pushed.  Since push buttons are high (1) initially, and low (0) if pushed, PORTE should
-	// look like:
-	// GPIO_PORTE_DATA_R => 0b???? ?0?? if S3 is pushed
-	// GPIO_PORTE_DATA_R => 0b???? ?1?? if S3 is not pushed
-	//
-	// This is not useful: There are 128 different 8 bit numbers that have the 3rd bit high or low.
-	// We can make it more clear if we mask the other 7 bits:
-	//	
-	// Bitwise AND:
-	// (GPIO_PORTE_DATA_R & 0b0000 0100) => 0b0000 0000 if S3 is pushed
-	// (GPIO_PORTE_DATA_R & 0b0000 0100) => 0b0000 0100 if S3 is not pushed
-	//
-	// Bitwise OR:
-	// (GPIO_PORTE_DATA_R | 0b1111 1011) => 0b1111 1011 if S3 is pushed
-	// (GPIO_PORTE_DATA_R | 0b1111 1011) => 0b1111 1111 if S3 is not pushed
-	//
-	// Other techniques (Shifting and bitwise AND)
-	// ((GPIO_PORTE_DATA_R >> 2) & 1) => 0 if S3 is pushed
-	// ((GPIO_PORTE_DATA_R >> 2) & 1) => 1 if S3 is not pushed
+    if ((GPIO_PORTE_DATA_R & 0b00000010) == 0) {
+        buttonPressed = 2;
+    }
 
-	// TODO: Write code below -- Return the left must button position pressed
+    if ((GPIO_PORTE_DATA_R & 0b00000100) == 0) {
+        buttonPressed = 3;
+    }
+
+    if ((GPIO_PORTE_DATA_R & 0b00001000) == 0) {
+        buttonPressed = 4;
+    }
 	
-	// INSERT CODE HERE!
-	
-	return 0; // EDIT ME
+	return buttonPressed;
 }
 
 

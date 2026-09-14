@@ -13,7 +13,6 @@
 #include "cyBot_uart.h"  // Functions for communiticate between CyBot and Putty (via UART)
                          // PuTTy: Buad=115200, 8 data bits, No Flow Control, No Party,  COM1
 
-#warning "Possible unimplemented functions"
 #define REPLACEME 0
 
 
@@ -21,19 +20,15 @@
 int main(void) {
 	button_init();
 	lcd_init();
-	            // Don't forget to initialze the cyBot UART before trying to use it
+    // Don't forget to initialze the cyBot UART before trying to use it
 	
 	// YOUR CODE HERE
+	uint8_t buttonPressed = 0;
 	
-	
-	while(1)
-	{
-	
-      // YOUR CODE HERE
-  
-
-
-	
+	while(1) {
+	    buttonPressed = button_getButton();
+        lcd_printf("\n  Button pressed: %d ", buttonPressed);
 	}
 	
+	return 0;
 }

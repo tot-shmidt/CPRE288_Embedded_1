@@ -13,48 +13,54 @@ LIB_SRCS += \
 
 C_SRCS += \
 ../Timer.c \
+../button.c \
+../lab3_template.c \
 ../lcd.c \
-../main.c \
 ../movement.c \
 ../open_interface.c \
 ../tm4c123gh6pm_startup_ccs.c 
 
 C_DEPS += \
 ./Timer.d \
+./button.d \
+./lab3_template.d \
 ./lcd.d \
-./main.d \
 ./movement.d \
 ./open_interface.d \
 ./tm4c123gh6pm_startup_ccs.d 
 
 OBJS += \
 ./Timer.obj \
+./button.obj \
+./lab3_template.obj \
 ./lcd.obj \
-./main.obj \
 ./movement.obj \
 ./open_interface.obj \
 ./tm4c123gh6pm_startup_ccs.obj 
 
 OBJS__QUOTED += \
 "Timer.obj" \
+"button.obj" \
+"lab3_template.obj" \
 "lcd.obj" \
-"main.obj" \
 "movement.obj" \
 "open_interface.obj" \
 "tm4c123gh6pm_startup_ccs.obj" 
 
 C_DEPS__QUOTED += \
 "Timer.d" \
+"button.d" \
+"lab3_template.d" \
 "lcd.d" \
-"main.d" \
 "movement.d" \
 "open_interface.d" \
 "tm4c123gh6pm_startup_ccs.d" 
 
 C_SRCS__QUOTED += \
 "../Timer.c" \
+"../button.c" \
+"../lab3_template.c" \
 "../lcd.c" \
-"../main.c" \
 "../movement.c" \
 "../open_interface.c" \
 "../tm4c123gh6pm_startup_ccs.c" 

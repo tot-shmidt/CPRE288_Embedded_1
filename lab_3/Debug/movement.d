@@ -1,8 +1,8 @@
 # FIXED
 
 movement.obj: ../movement.c
-movement.obj: U:/For_Code_Composer/lab_2/movement.h
-movement.obj: U:/For_Code_Composer/lab_2/open_interface.h
+movement.obj: U:/For_Code_Composer/lab_3/movement.h
+movement.obj: U:/For_Code_Composer/lab_3/open_interface.h
 movement.obj: C:/ti/ccs1271/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/stdio.h
 movement.obj: C:/ti/ccs1271/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/_ti_config.h
 movement.obj: C:/ti/ccs1271/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/linkage.h
@@ -21,17 +21,17 @@ movement.obj: C:/ti/ccs1271/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/std
 movement.obj: C:/ti/ccs1271/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/math.h
 movement.obj: C:/ti/ccs1271/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/_defs.h
 movement.obj: C:/ti/ccs1271/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/machine/_limits.h
-movement.obj: U:/For_Code_Composer/lab_2/Timer.h
+movement.obj: U:/For_Code_Composer/lab_3/Timer.h
 movement.obj: C:/ti/TivaWare_C_Series-2.2.0.295/inc/tm4c123gh6pm.h
 movement.obj: C:/ti/ccs1271/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/stdbool.h
 movement.obj: C:/ti/TivaWare_C_Series-2.2.0.295/driverlib/interrupt.h
-movement.obj: U:/For_Code_Composer/lab_2/lcd.h
+movement.obj: U:/For_Code_Composer/lab_3/lcd.h
 
 ../movement.c:
 
-U:/For_Code_Composer/lab_2/movement.h:
+U:/For_Code_Composer/lab_3/movement.h:
 
-U:/For_Code_Composer/lab_2/open_interface.h:
+U:/For_Code_Composer/lab_3/open_interface.h:
 
 C:/ti/ccs1271/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/stdio.h:
 
@@ -69,7 +69,7 @@ C:/ti/ccs1271/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/_defs.h:
 
 C:/ti/ccs1271/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/machine/_limits.h:
 
-U:/For_Code_Composer/lab_2/Timer.h:
+U:/For_Code_Composer/lab_3/Timer.h:
 
 C:/ti/TivaWare_C_Series-2.2.0.295/inc/tm4c123gh6pm.h:
 
@@ -77,5 +77,5 @@ C:/ti/ccs1271/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/stdbool.h:
 
 C:/ti/TivaWare_C_Series-2.2.0.295/driverlib/interrupt.h:
 
-U:/For_Code_Composer/lab_2/lcd.h:
+U:/For_Code_Composer/lab_3/lcd.h:
 

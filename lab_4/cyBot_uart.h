@@ -24,7 +24,7 @@
 // Initialize the UART to communciate between CyBot and PuTTy
 void cyBot_uart_init(void); 
 
-// Send a byte over the UART from CyBot and PuTTy (Buad Rate 115200, No Parity, No Flow Control)
+// Send a byte over the UART from CyBot to PuTTy (Buad Rate 115200, No Parity, No Flow Control)
 void cyBot_sendByte(char data);
 
 // Cybot WAITs to recive a byte from PuTTy (Buad Rate 115200, No Parity, No Flow Control).

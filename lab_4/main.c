@@ -49,6 +49,9 @@ int main(void) {
     int scan_init = 0b111;                      // Do I need to enable IR?
     cyBOT_init_Scan(scan_init);                 // Initialize features of the scanner.
 
+    right_calibration_value = 227500;           // Servo calibration for 0 degrees
+    left_calibration_value = 1230250;           // Servo calibration for 180 degrees
+
     int angle_increment = 2;                    // How often do we scan. Every 2 degrees in this case.
     float scan_array[91];    // Array where we will store readings from scanStruct.
 

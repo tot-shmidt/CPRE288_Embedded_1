@@ -8,6 +8,8 @@ void perform_scan(float scan_array[], int angle_increment, cyBOT_Scan_t* scanStr
 
     int i, current_angle;
 
+    cyBOT_scan(0, scanStruct);                    // We do one scan at 0 degrees and discard the reading. This is for the sensor to settle at 0.
+
     for (i = 0, current_angle = 0; i < num_of_scans; i++, current_angle += angle_increment) {
        cyBOT_Scan(current_angle, scanStruct);     // Perform scan
 

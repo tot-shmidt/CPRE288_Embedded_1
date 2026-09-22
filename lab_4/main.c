@@ -6,6 +6,9 @@
 
 #define NUM_OF_SCANS 91
 
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~ DATA STRUCTURES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 /**
  * This represents an object detected in detect_objects();
  */
@@ -17,19 +20,54 @@ struct tall_object {
     float distance_to_obj;
 };
 
+struct tall_object* objects_array[10];
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 /**
  * This function detects objects, their distances and widths.
  */
 void detect_objects(float scan_array[]) {
-    float current_distance;
-    float limit_distance = 3.0;
+    float next_distance;
+    float limit_distance = 2.0;
+    float delta_limit = 0.15;
+    char in_object = 'f';
 
     int i;
     for (i = 0; i < NUM_OF_SCANS; i++) {
-        current_distance = scan_array[i];
+        next_distance = scan_array[i];
 
-        if (current_distance >= limit_distance) {
+        // Is our new distance is less than the distance limit (2 meters)?
+        if (next_distance < limit_distance) {
+            // Are we during object creation?
+            if (in_object == 't') {
+                // Isn't the next distance much bigger or smaller then the previous one?
+                if ((next_distance - scan_array[i-1] < delta_limit) || (scan_array[i-1] - next_distance < delta_limit)) {
 
+                }
+                // Next distance differes to much!
+                else {
+
+                }
+            }
+            // We are not during object creation! Create one and start exploring it.
+            else {
+                // TO-DO: create object on the heap.
+            }
+        }
+        // New distance is greater than distance limit!
+        else {
+            // Are we during object creation?
+            if (in_object == 't') {
+                // Finish the object if it is a valid one
+
+            }
+            // We are not during object creation!
+            else {
+                // Not an object and beyond distance limit, so just continue to next iteration.
+                continue;
+            }
         }
     }
 }
@@ -110,6 +148,9 @@ void send_scan_to_putty(float scan_array[], int angle_increment) {
     }
 }
 
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ MAIN ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 int main(void) {
     timer_init();
     cyBot_uart_init();
@@ -148,8 +189,6 @@ int main(void) {
 
         }
     }
-
-
 
     return 0;
 }

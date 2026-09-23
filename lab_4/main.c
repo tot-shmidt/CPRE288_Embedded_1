@@ -3,8 +3,10 @@
 #include <stdio.h>
 #include "Timer.h"
 #include "sensor-data.h"
+#include <math.h>
 
 #define NUM_OF_SCANS 91
+#define PI 3.1415926
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~ DATA STRUCTURES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -20,19 +22,35 @@ struct tall_object {
     float distance_to_obj;
 };
 
-struct tall_object* objects_array[10];
+struct tall_object objects_array[10];
+int num_objects = 0;
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+/**
+ * Helper function for detect_objects to calculate linear width of an object.
+ */
+float linear_width_calculator(float side_length, int angle_degrees) {
+    float angle_radians = (angle_degrees * (PI / 180.0f)) / 2.0f;            // This is a half of the angle in radians. We need this to use with sine function in isosceles triangle.
+
+    return 2 * (sinf(angle_radians) * side_length);                          // We consider a half of the isosceles triangle as a right triangle. Find oposit katet, and multiply it by 2 to get the full side.
+}
+
 
 /**
  * This function detects objects, their distances and widths.
  */
 void detect_objects(float scan_array[]) {
+    // Reset the objects_array.
+    num_objects = 0;
+
     float next_distance;
-    float limit_distance = 2.0;
-    float delta_limit = 0.15;
+    float limit_distance = 200;     // In cantimeters.
+    float delta_limit = 15;         // In cantimeters.
     char in_object = 'f';
+    char minimal_width = 2;         // In cantimeters.
 
     int i;
     for (i = 0; i < NUM_OF_SCANS; i++) {
@@ -42,18 +60,36 @@ void detect_objects(float scan_array[]) {
         if (next_distance < limit_distance) {
             // Are we during object creation?
             if (in_object == 't') {
-                // Isn't the next distance much bigger or smaller then the previous one?
-                if ((next_distance - scan_array[i-1] < delta_limit) || (scan_array[i-1] - next_distance < delta_limit)) {
-
+                // Isn't the next distance much bigger or much smaller then the previous one?
+                if ((next_distance - scan_array[i-1] < delta_limit) && (scan_array[i-1] - next_distance < delta_limit)) {
+                    // The difference is not too big, so we are still in that same object.
+                    continue;
                 }
-                // Next distance differes to much!
+                // Next distance differes to much! Have to finish the object.
                 else {
+                    // Finish the object creation.
+                    objects_array[num_objects].end_angle = i * 2 - 2;
+                    objects_array[num_objects].radial_width = objects_array[num_objects].end_angle - objects_array[num_objects].start_angle;
+                    objects_array[num_objects].linear_width = linear_width_calculator(objects_array[num_objects].distance_to_obj, objects_array[num_objects].radial_width);
 
+                    // Check if the linear_width is big enough for us so we want to save this object. If big enough - advance num_objects variable.
+                    if (objects_array[num_objects].linear_width > minimal_width && num_objects < 9) {
+                        num_objects++;
+                    }
+
+                    // What if the next distance differs indeed too much but it is still less than limit_distance? Should I create a new object here, as otherwise I will lost this distance reading,
+                    // and I will create a new object only during next reading, creating a gap?
+                    objects_array[num_objects].start_angle = i * 2;
+                    objects_array[num_objects].distance_to_obj = next_distance;
                 }
             }
             // We are not during object creation! Create one and start exploring it.
             else {
-                // TO-DO: create object on the heap.
+                // Create object based on num_objects variable as index of the array
+                objects_array[num_objects].start_angle = i * 2;
+                objects_array[num_objects].distance_to_obj = next_distance;
+
+                in_object = 't';
             }
         }
         // New distance is greater than distance limit!
@@ -61,7 +97,17 @@ void detect_objects(float scan_array[]) {
             // Are we during object creation?
             if (in_object == 't') {
                 // Finish the object if it is a valid one
+                objects_array[num_objects].end_angle = i * 2 - 2;
+                objects_array[num_objects].radial_width = objects_array[num_objects].end_angle - objects_array[num_objects].start_angle;
+                objects_array[num_objects].linear_width = linear_width_calculator(objects_array[num_objects].distance_to_obj, objects_array[num_objects].radial_width);
 
+                // Check if the linear_width is big enough for us so we want to save this object. If big enough - advance num_objects variable.
+                if (objects_array[num_objects].linear_width > minimal_width && num_objects < 9) {
+                    num_objects++;
+                }
+
+                // We are not in object creation any more.
+                in_object = 'f';
             }
             // We are not during object creation!
             else {
@@ -70,7 +116,20 @@ void detect_objects(float scan_array[]) {
             }
         }
     }
+
+
+    // What if during last 91st iteration we are still in-object? We have to finish it creation, otherwise we would have it being not completed.
+    if (in_object == 't') {
+        objects_array[num_objects].end_angle = 180;
+        objects_array[num_objects].radial_width = 180 - objects_array[num_objects].start_angle;
+        objects_array[num_objects].linear_width = linear_width_calculator(objects_array[num_objects].distance_to_obj, objects_array[num_objects].radial_width);
+
+        if (objects_array[num_objects].linear_width > minimal_width && num_objects < 9) {
+            num_objects++;
+        }
+    }
 }
+
 
 /*
  * Print the array from sensor_data.h in the required format to a terminal.
@@ -90,7 +149,7 @@ void display_scan_to_terminal() {
  * Clean data which we got from a call to perform_scan()
  */
 void clean_scanner_data(float scan_array[]) {
-    float delta_limit = 0.15;                           // What delta do we consider as an outlier reading
+    float delta_limit = 15;                             // What delta do we consider as an outlier reading
 
     float current_distance;                             // Current value from the scan_array
 

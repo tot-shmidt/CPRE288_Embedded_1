@@ -28,6 +28,22 @@ int num_objects = 0;
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+void point_to_smallest_obj(cyBOT_Scan_t *scanStruct) {
+    if (num_objects > 0) {
+        int min_width_idx = 0;
+
+        int i;
+        for (i = 1; i < num_objects; i++) {
+            if (objects_array[min_width_idx].linear_width > objects_array[i].linear_width) {
+                min_width_idx = i;
+            }
+        }
+
+        int turn_angle = (objects_array[min_width_idx].start_angle + objects_array[min_width_idx].end_angle) / 2;
+
+        cyBOT_Scan(turn_angle, scanStruct);
+    }
+}
 
 /**
  * Helper function for detect_objects to calculate linear width of an object.
@@ -54,6 +70,11 @@ void detect_objects(float scan_array[]) {
 
     int i;
     for (i = 0; i < NUM_OF_SCANS; i++) {
+        // Check if our objects_array is already full.
+        if (num_objects >= 10) {
+            break;
+        }
+
         next_distance = scan_array[i];
 
         // Is our new distance is less than the distance limit (2 meters)?
@@ -185,23 +206,50 @@ void perform_scan(float scan_array[], int angle_increment, cyBOT_Scan_t* scanStr
 
 void send_scan_to_putty(float scan_array[], int angle_increment) {
     // Print header
-    char header[] = "Degrees    Distance(cm)\r\n";
+    char header1[] = "Degrees    Distance(cm)\r\n";
     int i = 0;
 
-    while (header[i] != '\0') {
-        cyBot_sendByte(header[i]);
+    while (header1[i] != '\0') {
+        cyBot_sendByte(header1[i]);
         i++;
     }
 
-    // Print data
-    char destination[50];
+    // 1. Print two columns data: Degree | Distance
+    char destination1[50];
 
     for (i = 0; i < NUM_OF_SCANS; i++) {
-        sprintf(destination, "%-11d%.1f\r\n", i * angle_increment, *(scan_array + i));
+        sprintf(destination1, "%-11d%.1f\r\n", i * angle_increment, *(scan_array + i));
 
         int j = 0;
-        while (destination[j] != '\0') {
-            cyBot_sendByte(destination[j]);
+        while (destination1[j] != '\0') {
+            cyBot_sendByte(destination1[j]);
+            j++;
+        }
+    }
+
+    cyBot_sendByte('\r');
+    cyBot_sendByte('\n');
+
+    // 2. Print Table with objects data
+
+    // Print the header of the table
+    char header2[] = "Object#  Angle  Distance  Width\r\n";
+
+    i = 0;
+    while (header2[i] != '\0') {
+        cyBot_sendByte(header2[i]);
+        i++;
+    }
+
+    // Print data about each object
+    char destination2[100];
+
+    for (i = 0; i < num_objects; i++) {
+        sprintf(destination2, "%-9d%-7d%-10.1f%-5.1f\r\n", i + 1, objects_array[i].start_angle, objects_array[i].distance_to_obj, objects_array[i].linear_width);
+
+        int j = 0;
+        while (destination2[j] != '\0') {
+            cyBot_sendByte(destination2[j]);
             j++;
         }
     }
@@ -244,8 +292,7 @@ int main(void) {
             send_scan_to_putty(scan_array, angle_increment);
 
             // 5. Point the sensor to the object with the smallest width.
-
-
+            point_to_smallest_obj(&scanStruct);
         }
     }
 

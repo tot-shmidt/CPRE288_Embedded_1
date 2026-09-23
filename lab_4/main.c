@@ -63,8 +63,8 @@ void detect_objects(float scan_array[]) {
     num_objects = 0;
 
     float next_distance;
-    float limit_distance = 200;     // In cantimeters.
-    float delta_limit = 15;         // In cantimeters.
+    float limit_distance = 150;     // In cantimeters.
+    float delta_limit = 10;         // In cantimeters.
     char in_object = 'f';
     char minimal_width = 2;         // In cantimeters.
 
@@ -84,6 +84,12 @@ void detect_objects(float scan_array[]) {
                 // Isn't the next distance much bigger or much smaller then the previous one?
                 if ((next_distance - scan_array[i-1] < delta_limit) && (scan_array[i-1] - next_distance < delta_limit)) {
                     // The difference is not too big, so we are still in that same object.
+
+                    // Try to save the smallest distance to the object.
+                    if (next_distance < objects_array[num_objects].distance_to_obj) {
+                        objects_array[num_objects].distance_to_obj = next_distance;
+                    }
+
                     continue;
                 }
                 // Next distance differes to much! Have to finish the object.
@@ -196,6 +202,7 @@ void perform_scan(float scan_array[], int angle_increment, cyBOT_Scan_t* scanStr
     int i, current_angle;
 
     cyBOT_Scan(0, scanStruct);                      // We do one scan at 0 degrees and discard the reading. This is for the sensor to settle at 0.
+    timer_waitMillis(1000);                         // Wait a second before scanning so the roomba gets its rest...
 
     for (i = 0, current_angle = 0; i < NUM_OF_SCANS; i++, current_angle += angle_increment) {
        cyBOT_Scan(current_angle, scanStruct);       // Perform scan

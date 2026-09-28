@@ -149,7 +149,7 @@ void turnToAngle(oi_t *sensor_data, double desiredAngle) {
     oi_setWheels(0, 0);              // Stop turning
 }
 
-void calculate_adjusted_angle() {
+void calculate_adjusted_angle(double *sensor_angle) {
 
 }
 

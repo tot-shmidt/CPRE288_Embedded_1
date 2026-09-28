@@ -5,23 +5,64 @@
 #include "scan.h"
 #include "movement.h"
 #include "open_interface.h"
+#include <stdlib.h>
 
-void request_angle(double *turn_angle) {
+
+void request_angle_and_dist(double *turn_angle, int *distance) {
     char message[] = "Provide turn angle: ";
     int i = 0;
 
-    // Send to putty angle request prompt
+    // 1. Get angle to turn
     while (message[i] != '\0') {
         cyBot_sendByte(message[i]);
         i++;
     }
 
-    // Get the angle.
-    *turn_angle = cyBot_getByte();
+    // Start parsing PyTTy's characters to get an integer
+    char crazy_angle_array[5];      // Crazy because I need to parse this String to get a number because Putty
+                                    // can't read 67 as one byte, so...
+    char crazy_digit;
 
+    // Form a string from which I will create an angle double.
+    i = 0;
+    while ((crazy_digit = cyBot_getByte()) != '\n') {
+        crazy_angle_array[i] = crazy_digit;
+        i++;
+    }
+
+    crazy_angle_array[i] = '\0';
+
+    // Conver our digit string to a double and put into dereferenced pointer.
+    *turn_angle = atof(crazy_angle_array);
+
+    cyBot_sendByte('\r');
+    cyBot_sendByte('\n');
+
+    // 2. Get distance to move forward.
+    char message1[] = "Provide forward distance: ";
+    i = 0;
+
+    while (message1[i] != '\0') {
+        cyBot_sendByte(message[i]);
+        i++;
+    }
+
+    // Form a distance string from which I will create a distance integer.
+    char crazy_distance_array[5];
+
+    i = 0;
+    while ((crazy_digit = cyBot_getByte()) != '\n') {
+        crazy_distance_array[i] = crazy_digit;
+        i++;
+    }
+
+    crazy_distance_array[i] = '\0';
+
+    *distance = atoi(crazy_distance_array);
+
+    cyBot_sendByte('\r');
     cyBot_sendByte('\n');
 }
-
 
 int main(void) {
     oi_t *sensor_data = oi_alloc();
@@ -64,12 +105,12 @@ int main(void) {
             send_scan_to_putty(scan_array, angle_increment);
 
             // 5. Turn to angle, providing input in degrees
-            request_angle(&angle_to_turn);
+            request_angle_and_dist(&angle_to_turn, &dist_to_move);
             calculate_adjusted_angle(&angle_to_turn);
             turnToAngle(sensor_data, angle_to_turn);
 
-
-            // 6. Move distance
+            // 6. Move distance forward
+            moveForward(sensor_data, dist_to_move, 150);
         }
     }
 

@@ -17,7 +17,7 @@ void turnToAngle(oi_t *sensor_data, double desiredAngle);
 /*  Since the sensor's center is different form the robots center, and robots turns based on its center,
  *  we need to re-adjust angle from the sensor to be the angle from the center of the robot.
  *  There is a distance from robot's to sensor's centers. */
-void calculate_adjusted_angle(double* desiredAngle);
+void calculate_adjusted_angle(double *sensor_angle, int *dist_to_move);
 
 void handleBump(oi_t *sensor_data, char sensorTriggered, double *traveled);
 

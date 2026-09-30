@@ -3,6 +3,8 @@
 #include <math.h>
 #include <stdio.h>
 
+#define PI 3.14159265358979323846
+
 /*
  * Moves the robot forward for a certain distance based on centimeters parameter.
  */
@@ -149,7 +151,23 @@ void turnToAngle(oi_t *sensor_data, double desiredAngle) {
     oi_setWheels(0, 0);              // Stop turning
 }
 
-void calculate_adjusted_angle(double *sensor_angle) {
+/*
+ * This function translates the angle from sensor to an actual angle that the roomba has to turn.
+ * It is designed to take the angle directly from the sensor's table, it assumes the number I type is based on the sensor's coordinate system.
+ */
+void calculate_adjusted_angle(double *sensor_angle, int *dist_to_move) {
+    int offset_dist = 14;                                       // Physical distance from the center of roomba to the sensor.
+    double sensor_angle_rad = *sensor_angle * (PI / 180.0);
 
+    // Calculate X and Y coordinates of the object. Center of the roomba is at (0,0), and the sensor is at (0, 14)
+    double object_x = (*dist_to_move) * cos(sensor_angle_rad);
+    double object_y = offset_dist + ((*dist_to_move) * sin(sensor_angle_rad));
+
+    double new_angle_rad = atan2(object_y, object_x);
+    double new_angle_degrees = (new_angle_rad * (180.0 / PI)) - 90.0;
+    *sensor_angle = new_angle_degrees;
+
+    // This will take in account that we actually need to travel more then the sensor told us, as we move from the center.
+    *dist_to_move = (int) sqrt((object_x * object_x) + (object_y * object_y));
 }
 

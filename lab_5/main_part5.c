@@ -9,7 +9,7 @@
 
 
 void request_angle_and_dist(double *turn_angle, int *distance) {
-    char message[] = "Provide turn angle: ";
+    char message[] = "Provide turn angle (90 is forward): ";
     int i = 0;
 
     // 1. Get angle to turn
@@ -19,14 +19,16 @@ void request_angle_and_dist(double *turn_angle, int *distance) {
     }
 
     // Start parsing PyTTy's characters to get an integer
-    char crazy_angle_array[5];      // Crazy because I need to parse this String to get a number because Putty
+    char crazy_angle_array[10];      // Crazy because I need to parse this String to get a number because Putty
                                     // can't read 67 as one byte, so...
     char crazy_digit;
 
     // Form a string from which I will create an angle double.
     i = 0;
-    while ((crazy_digit = cyBot_getByte()) != '\n') {
+    while ((crazy_digit = cyBot_getByte()) != '\r') {   // PuTTy sees ENTER as carriage return.
         crazy_angle_array[i] = crazy_digit;
+        cyBot_sendByte(crazy_digit);
+
         i++;
     }
 
@@ -43,16 +45,18 @@ void request_angle_and_dist(double *turn_angle, int *distance) {
     i = 0;
 
     while (message1[i] != '\0') {
-        cyBot_sendByte(message[i]);
+        cyBot_sendByte(message1[i]);
         i++;
     }
 
     // Form a distance string from which I will create a distance integer.
-    char crazy_distance_array[5];
+    char crazy_distance_array[10];
 
     i = 0;
-    while ((crazy_digit = cyBot_getByte()) != '\n') {
+    while ((crazy_digit = cyBot_getByte()) != '\r') {
         crazy_distance_array[i] = crazy_digit;
+        cyBot_sendByte(crazy_digit);
+
         i++;
     }
 
@@ -75,8 +79,9 @@ int main(void) {
     int scan_init = 0b111;                      // Do I need to enable IR?
     cyBOT_init_Scan(scan_init);                 // Initialize features of the scanner.
 
-    right_calibration_value = 227500;           // Servo calibration for 0 degrees
-    left_calibration_value = 1230250;           // Servo calibration for 180 degrees
+    // bot 22: 0 degrees: 248500; 180 degrees: 1272250
+    right_calibration_value = 248500;           // Servo calibration for 0 degrees
+    left_calibration_value = 1272250;           // Servo calibration for 180 degrees
 
     int angle_increment = 2;                    // How often do we scan. Every 2 degrees in this case.
     float scan_array[91];                       // Array where we will store readings from scanStruct.
@@ -106,11 +111,13 @@ int main(void) {
 
             // 5. Turn to angle, providing input in degrees
             request_angle_and_dist(&angle_to_turn, &dist_to_move);
-            calculate_adjusted_angle(&angle_to_turn);
+
+            // this function is designed to take the angle directly from the sensor's table, it assumes the number I type is based on the sensor's coordinate system.
+            calculate_adjusted_angle(&angle_to_turn, &dist_to_move);
             turnToAngle(sensor_data, angle_to_turn);
 
             // 6. Move distance forward
-            moveForward(sensor_data, dist_to_move, 150);
+            moveForward(sensor_data, dist_to_move, 100);
         }
     }
 

@@ -6,6 +6,7 @@
 int main(void) {
     // bot 1:  0 degrees: 227500; degrees 180: 1230250
     // bot 12: 0 degrees: 243250; degrees 180: 1209250
+    // bot 22: 0 degrees: 248500; 180 degrees: 1272250
 
     timer_init();
     lcd_init();

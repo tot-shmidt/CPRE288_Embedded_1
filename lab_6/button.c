@@ -14,6 +14,7 @@
 // GPIO_PORTE_DATA_R -- Name of the memory mapped register for GPIO Port E, 
 // which is connected to the push buttons
 #include "button.h"
+#include "lcd.h"
 
 // Global varibles
 volatile int button_event;
@@ -29,9 +30,6 @@ void button_init() {
 	if(initialized){
 		return;
 	}
-
-	// delete warning after implementing 
-	#warning "Unimplemented function: void button_init()"
 	
 	// Reading: To initialize and configure GPIO PORTE, visit pg. 656 in the 
 	// Tiva datasheet.
@@ -61,33 +59,27 @@ void button_init() {
  * Initialize and configure PORTE interupts
  */
 void init_button_interrupts() {
-
-    #warning: "Unimplemented function: void init_button_interrupts() -- You must configure GPIO to detect interrupts" // delete warning after implementing
     // In order to configure GPIO ports to detect interrupts, you will need to visit pg. 656 in the Tiva datasheet.
     // Notice that you already followed some steps in 10.3 for initialization and configuration of the GPIO ports in the function button_init().
     // Additional steps for setting up the GPIO port to detect interrupts have been outlined below.
-    // TODO: Complete code below
 
-    // 1) Mask the bits for pins 0-3
-    //GPIO_PORTE_IM_R &=
+    // 1) Mask the bits for pins 0-3 to configure edge sensing.
+    GPIO_PORTE_IM_R &= 0xF0;
 
     // 2) Set pins 0-3 to use edge sensing
-    //GPIO_PORTE_IS_R &=
+    GPIO_PORTE_IS_R &= 0xF0;
 
-    // 3) Set pins 0-3 to use both edges. We want to update the LCD
-    //    when a button is pressed, and when the button is released.
-    //GPIO_PORTE_IBE_R |=
+    // 3) Set pins 0-3 to use both edges. We want to update the LCD when a button is pressed, and when the button is released.
+    GPIO_PORTE_IBE_R |= 0x0F;
 
     // 4) Clear the interrupts
-    //GPIO_PORTE_ICR_R =
+    GPIO_PORTE_ICR_R = 0x0F;
 
     // 5) Unmask the bits for pins 0-3
-    //GPIO_PORTE_IM_R |=
+    GPIO_PORTE_IM_R |= 0x0F;
 
-    #warning: "Unimplemented function: void init_button_interrupts() -- You must configure interrupts" // delete warning after implementing
-    // TODO: Complete code below
     // 6) Enable GPIO port E interrupt
-    //NVIC_EN0_R |=
+    NVIC_EN0_R |= 0x00000010;           // 0b0000 .. 0001 0000 - PORTE has interrupt number 4, which is the fifth bit.
 
     // Bind the interrupt to the handler.
     IntRegister(INT_GPIOE, gpioe_handler);
@@ -98,12 +90,12 @@ void init_button_interrupts() {
  * Interrupt handler -- executes when a GPIO PortE hardware event occurs (i.e., for this lab a button is pressed)
  */
 void gpioe_handler() {
+    // Clear the Interrupt status of he handler.
+    GPIO_PORTE_ICR_R = 0x0F;
 
-#warning: "Unimplemented function: void gpioe_handler() -- You must configure interrupts" // delete warning after implementing
-    // Clear interrupt status register
-    // GPIO_PORTE_ICR_R =
-    // update button_event = 1;
     button_num = button_getButton();
+
+    button_event = 1;
 }
 
 
@@ -114,45 +106,25 @@ void gpioe_handler() {
  * @return the position of the rightmost button being pushed. 4 is the rightmost button, 1 is the leftmost button.  0 indicates no button being pressed
  */
 uint8_t button_getButton() {
+    uint8_t buttonPressed = 0;
 
-	#warning "Unimplemented function: uint8_t button_getButton(void)"	// delete warning after implementing
+    if ((GPIO_PORTE_DATA_R & 0b00000001) == 0) {
+        buttonPressed = 1;
+    }
 
-	//
-	// DELETE ME - How bitmasking works
-	// ----------------------------------------
-	// In embedded programming, often we only care about one or a few bits in a piece of 
-	// data.  There are several bitwise operators that we can apply to data in order
-	// to "mask" the bits that we don't care about.
-	//
-	//	| = bitwise OR		& = bitwise AND		^ = bitwise XOR		~ = bitwise NOT
-	//		  << x = shift left by x bits		 >> x = shift right by x bits 
-	//
-	// Let's say we want to know if push button 3 (S3) of GPIO_PORTE_DATA_R is
-	// pushed.  Since push buttons are high (1) initially, and low (0) if pushed, PORTE should
-	// look like:
-	// GPIO_PORTE_DATA_R => 0b???? ?0?? if S3 is pushed
-	// GPIO_PORTE_DATA_R => 0b???? ?1?? if S3 is not pushed
-	//
-	// This is not useful: There are 128 different 8 bit numbers that have the 3rd bit high or low.
-	// We can make it more clear if we mask the other 7 bits:
-	//	
-	// Bitwise AND:
-	// (GPIO_PORTE_DATA_R & 0b0000 0100) => 0b0000 0000 if S3 is pushed
-	// (GPIO_PORTE_DATA_R & 0b0000 0100) => 0b0000 0100 if S3 is not pushed
-	//
-	// Bitwise OR:
-	// (GPIO_PORTE_DATA_R | 0b1111 1011) => 0b1111 1011 if S3 is pushed
-	// (GPIO_PORTE_DATA_R | 0b1111 1011) => 0b1111 1111 if S3 is not pushed
-	//
-	// Other techniques (Shifting and bitwise AND)
-	// ((GPIO_PORTE_DATA_R >> 2) & 1) => 0 if S3 is pushed
-	// ((GPIO_PORTE_DATA_R >> 2) & 1) => 1 if S3 is not pushed
+    if ((GPIO_PORTE_DATA_R & 0b00000010) == 0) {
+        buttonPressed = 2;
+    }
 
-	// TODO: Write code below -- Return the left must button position pressed
-	
-	// INSERT CODE HERE!
-	
-	return 0; // EDIT ME
+    if ((GPIO_PORTE_DATA_R & 0b00000100) == 0) {
+        buttonPressed = 3;
+    }
+
+    if ((GPIO_PORTE_DATA_R & 0b00001000) == 0) {
+        buttonPressed = 4;
+    }
+
+    return buttonPressed;
 }
 
 

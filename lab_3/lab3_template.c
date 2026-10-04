@@ -28,14 +28,14 @@ int main(void) {
  *
  */
 	// YOUR CODE HERE
-//	uint8_t buttonPressed = 0;
-//
-//	while(1) {
-//	    buttonPressed = button_getButton();
-//      lcd_printf("\n  Button pressed: %d ", buttonPressed);
-//	}
-//
-//	return 0;
+	uint8_t buttonPressed = 0;
+
+	while(1) {
+	    buttonPressed = button_getButton();
+	    lcd_printf("\n  Button pressed: %d ", buttonPressed);
+	}
+
+	return 0;
 /*
  * *************************************************
  */
@@ -43,27 +43,27 @@ int main(void) {
 /*
  * THIS IS PART 4 of Lab 3
  */
-	cyBot_uart_init();
-
-	uint8_t buttonPressed = 0;
-	char byteSend;
-
-	while (1) {
-	    buttonPressed = button_getButton();
-	    lcd_printf("\n  Button pressed: %d ", buttonPressed);
-
-	    if (buttonPressed != 0) {
-	        if (buttonPressed == 1) {
-	            byteSend = '1';
-	        } else if (buttonPressed == 2) {
-	            byteSend = '2';
-	        } else if (buttonPressed == 3) {
-	            byteSend = '3';
-	        } else if (buttonPressed == 4) {
-	            byteSend = '4';
-	        }
-
-	        cyBot_sendByte(byteSend);
-	    }
-	}
+//	cyBot_uart_init();
+//
+//	uint8_t buttonPressed = 0;
+//	char byteSend;
+//
+//	while (1) {
+//	    buttonPressed = button_getButton();
+//	    lcd_printf("\n  Button pressed: %d ", buttonPressed);
+//
+//	    if (buttonPressed != 0) {
+//	        if (buttonPressed == 1) {
+//	            byteSend = '1';
+//	        } else if (buttonPressed == 2) {
+//	            byteSend = '2';
+//	        } else if (buttonPressed == 3) {
+//	            byteSend = '3';
+//	        } else if (buttonPressed == 4) {
+//	            byteSend = '4';
+//	        }
+//
+//	        cyBot_sendByte(byteSend);
+//	    }
+//	}
 }

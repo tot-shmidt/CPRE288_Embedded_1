@@ -68,7 +68,7 @@ void request_angle_and_dist(double *turn_angle, int *distance) {
     cyBot_sendByte('\n');
 }
 
-int main(void) {
+    int main(void) {
     oi_t *sensor_data = oi_alloc();
     oi_init(sensor_data);
 
@@ -80,8 +80,8 @@ int main(void) {
     cyBOT_init_Scan(scan_init);                 // Initialize features of the scanner.
 
     // bot 22: 0 degrees: 248500; 180 degrees: 1272250
-    right_calibration_value = 248500;           // Servo calibration for 0 degrees
-    left_calibration_value = 1272250;           // Servo calibration for 180 degrees
+    right_calibration_value = 243250;           // Servo calibration for 0 degrees
+    left_calibration_value = 1209250;           // Servo calibration for 180 degrees
 
     int angle_increment = 2;                    // How often do we scan. Every 2 degrees in this case.
     float scan_array[91];                       // Array where we will store readings from scanStruct.

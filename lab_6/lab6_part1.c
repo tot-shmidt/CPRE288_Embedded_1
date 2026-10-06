@@ -13,6 +13,7 @@ int main() {
     // When no button has been pressed, 0 should be displayed. How do I handle this?
     lcd_printf("Button pressed: 0");
 
+    // IMPORTANT: Don't forget to select correct ISR in button.c
     while (1) {
         if (button_event == 1) {
             lcd_printf("Button pressed: %d", button_num);

@@ -23,7 +23,8 @@ void button_init();
 void init_button_interrupts();
 
 // handler for gpio event when button is pressed
-void gpioe_handler();
+void gpioe_handler1();
+void gpioe_handler2();
 
 ///Non-blocking call
 ///Returns highest value button being pressed, 0 if no button pressed

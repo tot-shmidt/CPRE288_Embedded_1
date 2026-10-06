@@ -15,6 +15,8 @@
 // which is connected to the push buttons
 #include "button.h"
 #include "lcd.h"
+#include "cyBot_uart.h"
+#include <stdio.h>
 
 // Global varibles
 volatile int button_event;
@@ -82,20 +84,47 @@ void init_button_interrupts() {
     NVIC_EN0_R |= 0x00000010;           // 0b0000 .. 0001 0000 - PORTE has interrupt number 4, which is the fifth bit.
 
     // Bind the interrupt to the handler.
-    IntRegister(INT_GPIOE, gpioe_handler);
+    IntRegister(INT_GPIOE, gpioe_handler2);
 }
 
 
 /**
  * Interrupt handler -- executes when a GPIO PortE hardware event occurs (i.e., for this lab a button is pressed)
  */
-void gpioe_handler() {
-    // Clear the Interrupt status of he handler.
+// For Part 1 of lab 6
+void gpioe_handler1() {
+    // Clear the Interrupt status of the handler.
     GPIO_PORTE_ICR_R = 0x0F;
 
     button_num = button_getButton();
 
     button_event = 1;
+}
+
+// For Part 2 of lab 6
+char prefix_msg[] = "Button pressed: ";
+char final_msg[20];
+int i = 0;
+
+void gpioe_handler2() {
+    // Clear the Interrupt status of the handler.
+    GPIO_PORTE_ICR_R = 0x0F;
+
+    button_num = button_getButton();
+
+    if (button_num != 0) {
+        sprintf(final_msg, "%s%d", prefix_msg, button_num);
+
+        while (final_msg[i] != '\0') {
+            cyBot_sendByte(final_msg[i]);
+            i++;
+        }
+
+        cyBot_sendByte('\r');
+        cyBot_sendByte('\n');
+
+        i = 0;
+    }
 }
 
 

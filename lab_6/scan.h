@@ -40,5 +40,8 @@ void clean_scanner_data(float scan_array[]);
 // Perform ultra-sonic scans on 180 degrees range and save distances to scan_array.
 void perform_scan(float scan_array[], int angle_increment, cyBOT_Scan_t* scanStruct);
 
+// Perform IR scan at a given angle. Not 180 degrees.
+float perform_single_IR_scan(int angle, cyBOT_Scan_t* scanStruct);
+
 // Sends to column data (angle - distance) and table of objects to PuTTy.
 void send_scan_to_putty(float scan_array[], int angle_increment);

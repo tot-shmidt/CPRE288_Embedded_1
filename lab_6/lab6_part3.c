@@ -10,6 +10,7 @@
  */
 
 #include "button.h"
+#include "scan.h"
 #include "timer.h"
 #include "lcd.h"
 #include <string.h>
@@ -52,24 +53,42 @@ int main(void) {
     char dest[50];
     int i = 1;
     int j = 0;
+    float distance;
 
 	while(1) {
 	    input_from_pc = cyBot_getByte_blocking();
 
 	    if (input_from_pc == 's') {
-	        cyBOT_Scan(100, &scanStruct);
+//	        cyBOT_Scan(100, &scanStruct);
+//
+//	        sprintf(dest, "%d: %d\r\n", i, scanStruct.IR_raw_val);
+//
+//	        while (dest[j] != '\0') {
+//	            cyBot_sendByte(dest[j]);
+//	            j++;
+//	        }
+//
+//	        memset(dest, 0, 50);
+//
+//	        i++;
+//	        j = 0;
 
-	        sprintf(dest, "%d: %d\r\n", i, scanStruct.IR_raw_val);
+	        // Get float value of the distance
+	        distance = perform_single_IR_scan(100, &scanStruct);
+
+	        // Print value to PuTTy
+	        sprintf(dest, "%d: %.1f cm.\r\n", i, distance);
 
 	        while (dest[j] != '\0') {
-	            cyBot_sendByte(dest[j]);
-	            j++;
-	        }
-
-	        memset(dest, 0, 50);
+                cyBot_sendByte(dest[j]);
+                j++;
+            }
 
 	        i++;
 	        j = 0;
+
+	        // Print distance to the LCD display.
+	        lcd_printf("%.1f cm.", distance);
 	    }
 	}
 	

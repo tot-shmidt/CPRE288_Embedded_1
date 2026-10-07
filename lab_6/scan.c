@@ -197,8 +197,42 @@ void perform_scan(float scan_array[], int angle_increment, cyBOT_Scan_t* scanStr
 }
 
 
+/**
+ * Converts IR voltage to distance based on the equation of best fit.
+ */
+float IR_volts_to_dist(float voltage) {
+    if (voltage < 620.0f) {
+        return 50.0f;
+    }
+
+    return 24151.0f / (voltage - 619.0f);
+}
 
 
+/*
+ * Perform IR scan at a given anlge. Single meaning one direction, not 180 degrees cone.
+ */
+float perform_single_IR_scan(int angle, cyBOT_Scan_t* scanStruct) {
+    float average_voltage = 0.0f;
+    int precision = 3;
+
+    int i;
+    for (i = 0; i < precision; i++) {
+        cyBOT_Scan(angle, scanStruct);
+        average_voltage += scanStruct->IR_raw_val;
+
+        timer_waitMillis(10);
+    }
+
+    average_voltage = average_voltage / precision;
+
+    return IR_volts_to_dist(average_voltage);
+}
+
+
+/*
+ * Prints all the data to putty with readings and objects table after a scan and object detection.
+ */
 void send_scan_to_putty(float scan_array[], int angle_increment) {
     // Print header
     char header1[] = "Degrees    Distance(cm)\r\n";

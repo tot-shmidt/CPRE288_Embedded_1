@@ -197,6 +197,8 @@ void perform_scan(float scan_array[], int angle_increment, cyBOT_Scan_t* scanStr
 }
 
 
+
+
 void send_scan_to_putty(float scan_array[], int angle_increment) {
     // Print header
     char header1[] = "Degrees    Distance(cm)\r\n";

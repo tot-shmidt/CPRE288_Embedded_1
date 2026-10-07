@@ -214,7 +214,7 @@ float IR_volts_to_dist(float voltage) {
  */
 float perform_single_IR_scan(int angle, cyBOT_Scan_t* scanStruct) {
     float average_voltage = 0.0f;
-    int precision = 3;
+    int precision = 5;
 
     int i;
     for (i = 0; i < precision; i++) {

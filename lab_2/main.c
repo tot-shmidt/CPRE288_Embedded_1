@@ -42,6 +42,8 @@ void main() {
      char input;
      char message[] = "Got an m\n";
 
+     lcd_printf("Running");
+
      while (1) {
         input = cyBot_getByte();
 

@@ -1,0 +1,84 @@
+/*
+*
+*   uart_extra_help.c
+* Description: This is file is meant for those that would like a little
+*              extra help with formatting their code, and followig the Datasheet.
+*/
+
+#include "uart.h"
+#include "Timer.h"
+#include "driverlib/interrupt.h"
+
+#define REPLACE_ME 0x00
+
+
+void uart_init(int baud) {
+    SYSCTL_RCGCGPIO_R  |= 0b10;                                 // enable clock GPIOB (page 340)
+    SYSCTL_RCGCUART_R  |= 0b10;                                 // enable clock UART1 (page 344)
+    GPIO_PORTB_AFSEL_R |= 0b11;                                 // sets PB0 and PB1 as peripherals (page 671)
+    GPIO_PORTB_PCTL_R  |= 0x11;                                 // pmc0 and pmc1       (page 688)  also refer to page 650. PB0: U1Rx 1 ; PB1: U1Tx 1.
+    GPIO_PORTB_DEN_R   |= 0b11;                                 // enables pb0 and pb1
+    GPIO_PORTB_DIR_R    = (GPIO_PORTB_DIR_R | 0b10) & ~0b01;    // sets pb0 as input, pb1 as output
+
+    //compute baud values [UART clock= 16 MHz] 
+    float clock_rate = 16000000.0f;
+
+    int fbrd;
+    int ibrd;
+
+    float brd = clock_rate / (16.0f * baud);
+    ibrd = (int) brd;                               // Extract integer part of brd
+    fbrd = (int) ((brd - ibrd) * 64.0f + 0.5f);     // Extract first decimal part, then multiply and add magic numbers
+
+    UART1_CTL_R &= ~0b01;                 // disable UART1 (page 918)
+    UART1_IBRD_R = ibrd;                  // write integer portion of BRD to IBRD
+    UART1_FBRD_R = fbrd;                  // write fractional portion of BRD to FBRD
+    UART1_LCRH_R = 0b01110000;            // write serial communication parameters (page 916) * 8bit and no parity
+    UART1_CC_R   = 0x0;                   // use system clock as clock source (page 939)
+    UART1_CTL_R |= 0b001100000001;        // enable UART1 and RXE and TXE bits.
+}
+
+void uart_sendChar(char data)
+{
+   //TODO
+   
+}
+
+char uart_receive(void)
+{
+ //TODO
+ 
+}
+
+void uart_sendStr(const char *data)
+{
+    //TODO
+	
+}
+
+// _PART3
+
+
+void uart_interrupt_init()
+{
+    // Enable interrupts for receiving bytes through UART1
+    UART1_IM_R |= REPLACE_ME; //enable interrupt on receive - page 924
+
+    // Find the NVIC enable register and bit responsible for UART1 in table 2-9
+    // Note: NVIC register descriptions are found in chapter 3.4
+    NVIC_EN0_R |= REPLACE_ME; //enable uart1 interrupts - page 104
+
+    // Find the vector number of UART1 in table 2-9 ! UART1 is 22 from vector number page 104
+    IntRegister(INT_UART1, REPLACE_ME); //give the microcontroller the address of our interrupt handler - page 104 22 is the vector number
+
+}
+
+void uart_interrupt_handler()
+{
+// STEP1: Check the Masked Interrup Status
+
+//STEP2:  Copy the data 
+
+//STEP3:  Clear the interrup   
+
+}

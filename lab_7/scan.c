@@ -239,7 +239,7 @@ void send_scan_to_putty(float scan_array[], int angle_increment) {
     int i = 0;
 
     while (header1[i] != '\0') {
-        cyBot_sendByte(header1[i]);
+        uart_sendChar(header1[i]);
         i++;
     }
 
@@ -251,13 +251,13 @@ void send_scan_to_putty(float scan_array[], int angle_increment) {
 
         int j = 0;
         while (destination1[j] != '\0') {
-            cyBot_sendByte(destination1[j]);
+            uart_sendChar(destination1[j]);
             j++;
         }
     }
 
-    cyBot_sendByte('\r');
-    cyBot_sendByte('\n');
+    uart_sendChar('\r');
+    uart_sendChar('\n');
 
     // 2. Print Table with objects data
 
@@ -266,7 +266,7 @@ void send_scan_to_putty(float scan_array[], int angle_increment) {
 
     i = 0;
     while (header2[i] != '\0') {
-        cyBot_sendByte(header2[i]);
+        uart_sendChar(header2[i]);
         i++;
     }
 
@@ -278,7 +278,7 @@ void send_scan_to_putty(float scan_array[], int angle_increment) {
 
         int j = 0;
         while (destination2[j] != '\0') {
-            cyBot_sendByte(destination2[j]);
+            uart_sendChar(destination2[j]);
             j++;
         }
     }

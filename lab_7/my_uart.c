@@ -1,4 +1,4 @@
-#include "uart.h"
+#include "my_uart.h"
 #include "Timer.h"
 #include "driverlib/interrupt.h"
 #include <inc/tm4c123gh6pm.h>
@@ -49,6 +49,13 @@ char uart_receive(void) {
         ;
  
     char symbol = (UART1_DR_R & 0xFF);    // By assigning 32 bits into char, implicit casting happens, and 8 lower bits are only preserved.
+
+    if (symbol == '\r') {
+        uart_sendChar('\n');
+        uart_sendChar('\r');
+    } else {
+        uart_sendChar(symbol);
+    }
 
     return symbol;
 }

@@ -4,7 +4,7 @@
 
 #include "open_interface.h"
 #include "cyBot_Scan.h"
-#include "cyBot_uart.h"
+#include "my_uart.h"
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~ DATA STRUCTURES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

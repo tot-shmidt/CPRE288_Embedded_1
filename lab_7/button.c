@@ -15,7 +15,7 @@
 // which is connected to the push buttons
 #include "button.h"
 #include "lcd.h"
-#include "cyBot_uart.h"
+#include "my_uart.h"
 #include <stdio.h>
 
 // Global varibles

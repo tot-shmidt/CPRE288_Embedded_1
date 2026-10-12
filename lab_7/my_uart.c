@@ -1,13 +1,8 @@
-/*
-*
-*   uart_extra_help.c
-* Description: This is file is meant for those that would like a little
-*              extra help with formatting their code, and followig the Datasheet.
-*/
-
 #include "uart.h"
 #include "Timer.h"
 #include "driverlib/interrupt.h"
+#include <inc/tm4c123gh6pm.h>
+
 
 #define REPLACE_ME 0x00
 
@@ -15,6 +10,8 @@
 void uart_init(int baud) {
     SYSCTL_RCGCGPIO_R  |= 0b10;                                 // enable clock GPIOB (page 340)
     SYSCTL_RCGCUART_R  |= 0b10;                                 // enable clock UART1 (page 344)
+    timer_waitMillis(1);                                        // This is necessary according to the data sheet
+
     GPIO_PORTB_AFSEL_R |= 0b11;                                 // sets PB0 and PB1 as peripherals (page 671)
     GPIO_PORTB_PCTL_R  |= 0x11;                                 // pmc0 and pmc1       (page 688)  also refer to page 650. PB0: U1Rx 1 ; PB1: U1Tx 1.
     GPIO_PORTB_DEN_R   |= 0b11;                                 // enables pb0 and pb1
@@ -38,22 +35,31 @@ void uart_init(int baud) {
     UART1_CTL_R |= 0b001100000001;        // enable UART1 and RXE and TXE bits.
 }
 
-void uart_sendChar(char data)
-{
-   //TODO
-   
+void uart_sendChar(char data) {
+    // Make sure transmit FIFO is not full. Check TXFF bit (5) is not set.
+    while ((UART1_FR_R & 0x20) != 0)
+        ;
+
+    UART1_DR_R = data;
 }
 
-char uart_receive(void)
-{
- //TODO
+char uart_receive(void) {
+    // Make sure receive FIFO is not empty. check that RXFE bit (4) is not set.
+    while ((UART1_FR_R & 0x10) != 0)      // Loop until RXFE bit becomes 0.
+        ;
  
+    char symbol = (UART1_DR_R & 0xFF);    // By assigning 32 bits into char, implicit casting happens, and 8 lower bits are only preserved.
+
+    return symbol;
 }
 
-void uart_sendStr(const char *data)
-{
-    //TODO
-	
+void uart_sendStr(const char *data) {
+    int i = 0;
+
+    while (data[i] != '\0') {
+        uart_sendChar(data[i]);
+        i++;
+    }
 }
 
 // _PART3

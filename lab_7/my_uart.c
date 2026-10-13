@@ -72,26 +72,45 @@ void uart_sendStr(const char *data) {
 // _PART3
 
 
-void uart_interrupt_init()
-{
-    // Enable interrupts for receiving bytes through UART1
-    UART1_IM_R |= REPLACE_ME; //enable interrupt on receive - page 924
-
+void uart_interrupt_init() {
     // Find the NVIC enable register and bit responsible for UART1 in table 2-9
     // Note: NVIC register descriptions are found in chapter 3.4
-    NVIC_EN0_R |= REPLACE_ME; //enable uart1 interrupts - page 104
+    NVIC_EN0_R |= 0b1000000; //enable uart1 interrupts - page 104 (Interrupt number 6)
+
+    // Enable interrupts for receiving bytes through UART1
+    UART1_IM_R |= 0b1010000; //enable interrupt on receive - page 924
 
     // Find the vector number of UART1 in table 2-9 ! UART1 is 22 from vector number page 104
-    IntRegister(INT_UART1, REPLACE_ME); //give the microcontroller the address of our interrupt handler - page 104 22 is the vector number
-
+    IntRegister(INT_UART1, uart_interrupt_handler); //give the microcontroller the address of our interrupt handler - page 104 22 is the vector number
 }
 
-void uart_interrupt_handler()
-{
-// STEP1: Check the Masked Interrup Status
+void uart_interrupt_handler() {
+    // STEP1: Check the Masked Interrup Status
+    if ((UART1_MIS_R & 0b1010000) != 0) {
+        //STEP2:  Copy the data
+        uart_data = UART1_DR_R & 0xFF;
 
-//STEP2:  Copy the data 
+        //STEP3:  Clear the interrup
+        UART1_ICR_R = 0b1010000;
 
-//STEP3:  Clear the interrup   
-
+        flag = 1;
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

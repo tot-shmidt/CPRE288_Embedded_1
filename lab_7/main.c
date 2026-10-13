@@ -5,9 +5,9 @@
  *              extra help with formatting their code.
  *
  */
-#define _PART1 1
+#define _PART1 0
 #define _PART2 0
-#define _PART3 0
+#define _PART3 1
 
 #include "timer.h"
 #include "lcd.h"
@@ -79,7 +79,50 @@ void main() {
 
 // Receive characters using interrupts.
 #if _PART3
- // TODO
+
+    char buffer[21];
+    int index = 0;    // From 0 to 20
+    char symbol;
+    char debug_msg[20];
+    uart_interrupt_init();
+
+    while (1) {
+        if (flag == 1) {
+            symbol = uart_data;
+
+            // My echo logic from uart_receive to print to PuTTy.
+            if (symbol == '\r') {
+                   uart_sendChar('\n');
+                   uart_sendChar('\r');
+            } else {
+                   uart_sendChar(symbol);
+            }
+
+            // Display logic.
+            if (symbol == '\r') {
+                buffer[index] = '\0';
+                lcd_clear();
+                lcd_printf("%s", buffer);
+                index = 0;
+            } else {
+                buffer[index] = symbol;
+
+                if (index < 19) {
+                    sprintf(debug_msg, "Symbol: %c, #%d ", symbol, index + 1);
+                    lcd_printf("%s", debug_msg);
+
+                    index++;
+                } else if (index == 19) {
+                    lcd_clear();
+                    buffer[index+1] = '\0';
+                    lcd_printf("%s", buffer);
+                    index = 0;
+                }
+            }
+
+            flag = 0;
+        }
+    }
 
 #endif
 

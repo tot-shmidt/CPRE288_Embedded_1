@@ -38,7 +38,7 @@ void clean_scanner_data(float scan_array[]);
 
 
 // Perform ultra-sonic scans on 180 degrees range and save distances to scan_array.
-void perform_scan(float scan_array[], int angle_increment, cyBOT_Scan_t* scanStruct);
+void perform_scan(float scan_array_US[], float scan_array_IR[], int angle_increment, cyBOT_Scan_t* scanStruct);
 
 // Perform IR scan at a given angle. Not 180 degrees.
 float perform_single_IR_scan(int angle, cyBOT_Scan_t* scanStruct);

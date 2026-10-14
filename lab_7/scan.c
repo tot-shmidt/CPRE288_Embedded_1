@@ -183,22 +183,29 @@ void clean_scanner_data(float scan_array[]) {
 /*
  * Perform ultra-sonic scans on 180 degrees range and save distances to scan_array.
  */
-void perform_scan(float scan_array[], int angle_increment, cyBOT_Scan_t* scanStruct) {
+void perform_scan(float scan_array_US[], float scan_array_IR[], int angle_increment, cyBOT_Scan_t* scanStruct) {
     int i, current_angle;
 
     cyBOT_Scan(0, scanStruct);                      // We do one scan at 0 degrees and discard the reading. This is for the sensor to settle at 0.
     timer_waitMillis(1000);                         // Wait a second before scanning so the roomba gets its rest...
 
     for (i = 0, current_angle = 0; i < NUM_OF_SCANS; i++, current_angle += angle_increment) {
-       cyBOT_Scan(current_angle, scanStruct);       // Perform scan
+       // Read Ultra-Sonic data scan.
+       cyBOT_Scan(current_angle, scanStruct);
+       scan_array_US[i] = scanStruct->sound_dist;      // *(scan_array + i), Save measured distance to scan_array
 
-       *(scan_array + i) = scanStruct->sound_dist;  // Save measured distance to scan_array
+       // Read IR data scan.
+       scan_array_IR[i] = perform_single_IR_scan(current_angle, scanStruct);
+
+       // Wait before the next anle scan.
+       timer_waitMillis(5);
     }
 }
 
 
 /**
  * Converts IR voltage to distance based on the equation of best fit.
+ * Data is taken from CyBot 3
  */
 float IR_volts_to_dist(float voltage) {
     if (voltage < 620.0f) {

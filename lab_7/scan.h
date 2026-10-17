@@ -1,6 +1,8 @@
 /*
  * This is our scanning "API" developed in lab 4.
  */
+#ifndef SCAN_H_
+#define SCAN_H_
 
 #include "open_interface.h"
 #include "cyBot_Scan.h"
@@ -28,7 +30,7 @@ struct tall_object {
 void point_to_smallest_obj(cyBOT_Scan_t *scanStruct);
 
 // This function detects objects, their distances and widths.
-void detect_objects(float scan_array[]);
+void detect_objects(float scan_array_IR[], float scan_array_US[]);
 
 // Print the array from sensor_data.h in the required format to a terminal.
 void display_scan_to_terminal();
@@ -44,4 +46,7 @@ void perform_scan(float scan_array_US[], float scan_array_IR[], int angle_increm
 float perform_single_IR_scan(int angle, cyBOT_Scan_t* scanStruct);
 
 // Sends to column data (angle - distance) and table of objects to PuTTy.
-void send_scan_to_putty(float scan_array[], int angle_increment);
+void send_scan_to_putty(float scan_array_IR[], float scan_array_US[], int angle_increment);
+
+
+#endif

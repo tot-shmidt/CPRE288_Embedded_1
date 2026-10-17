@@ -16,8 +16,8 @@
 
 
 // Adding global volatile varibles for communcating between and your Interupt Service Routine, and your non-interupt code.
-volatile  char uart_data;  // Your UART interupt code can place read data here
-volatile  char flag;       // Your UART interupt can update this flag to indicate that it has placed new data in uart_data
+//volatile  char uart_data;  // Your UART interupt code can place read data here
+//volatile  char flag;       // Your UART interupt can update this flag to indicate that it has placed new data in uart_data
 
 
 void main() {

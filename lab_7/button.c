@@ -15,8 +15,9 @@
 // which is connected to the push buttons
 #include "button.h"
 #include "lcd.h"
-#include "my_uart.h"
 #include <stdio.h>
+#include "my_uart.h"
+
 
 // Global varibles
 volatile int button_event;
@@ -116,12 +117,12 @@ void gpioe_handler2() {
         sprintf(final_msg, "%s%d", prefix_msg, button_num);
 
         while (final_msg[i] != '\0') {
-            cyBot_sendByte(final_msg[i]);
+            uart_sendChar(final_msg[i]);
             i++;
         }
 
-        cyBot_sendByte('\r');
-        cyBot_sendByte('\n');
+        uart_sendChar('\r');
+        uart_sendChar('\n');
 
         i = 0;
     }

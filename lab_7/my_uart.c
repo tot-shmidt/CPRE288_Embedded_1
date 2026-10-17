@@ -6,6 +6,9 @@
 
 #define REPLACE_ME 0x00
 
+volatile char uart_data = 0;
+volatile char flag = 0;
+
 
 void uart_init(int baud) {
     SYSCTL_RCGCGPIO_R  |= 0b10;                                 // enable clock GPIOB (page 340)

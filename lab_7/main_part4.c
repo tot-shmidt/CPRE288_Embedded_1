@@ -7,7 +7,7 @@
 
 int main(void) {
     timer_init();
-    uart_init();
+    uart_init(115200);
 
     cyBOT_Scan_t scanStruct;                    // Struct for cyBot_Scan function.
     int scan_init = 0b111;                      // Do I need to enable IR?
@@ -22,7 +22,7 @@ int main(void) {
     float scan_array_IR[91];                    // Array for infra-red sensor readings.
 
     // Debug
-    cyBot_sendByte('A');
+    uart_sendChar('A');
 
     while (1) {
         char input = uart_receive();
@@ -33,12 +33,13 @@ int main(void) {
 
             // 2. Clean the data.
             clean_scanner_data(scan_array_US);
+            clean_scanner_data(scan_array_IR);
 
             // 3. Detect objects from the data and calculate their radial and liner width
-            detect_objects(scan_array_US);
+            detect_objects(scan_array_IR, scan_array_US);
 
             // 4. Print whole array and object structs to the terminal/putty, depending on the phase of development
-            send_scan_to_putty(scan_array_US, angle_increment);
+            send_scan_to_putty(scan_array_IR, scan_array_US, angle_increment);
 
             // 5. Point the sensor to the object with the smallest width.
             point_to_smallest_obj(&scanStruct);

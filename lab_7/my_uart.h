@@ -17,9 +17,7 @@
 // These two varbles have been declared
 // in the file containing main
 extern volatile  char uart_data;  // Your UART interupt code can place read data here
-extern volatile  char flag;       // Your UART interupt can update this flag
-                                  // to indicate that it has placed new data
-                                  // in uart_data       
+extern volatile  char flag;       // Your UART interupt can update this flag to indicate that it has placed new data in uart_data.
 
 
 void uart_init(int baud);

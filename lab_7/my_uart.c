@@ -99,21 +99,3 @@ void uart_interrupt_handler() {
         flag = 1;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

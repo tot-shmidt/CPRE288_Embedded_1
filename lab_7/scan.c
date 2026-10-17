@@ -3,13 +3,18 @@
 #include <math.h>
 #include <stdio.h>
 #include "my_uart.h"
+#include <stdlib.h>
+#include "cyBot_Scan.h"
 
 
 // This is where we store our objects after every scan and calculation.
 struct tall_object objects_array[10];
 int num_objects = 0;
 
-
+// I am lost here. I feel like num_objects variable is actually an index. In detect_objects, I can create an object like objects_array[0], as
+// it is a valid index. But in point_to_smallest_obj I check if (num_objects > 0) but this is incorrect, as what if I have only one object, and its
+// index is 0? Oh, I see. If I successfully create on object, I wll increase num_objects any way to one, right? So this is why I wrote it this way.
+// Do I start from i = 1, as If I have only one object at index 0, the for loop will not execute, and min_width_idx is by default 0, that single objec?
 void point_to_smallest_obj(cyBOT_Scan_t *scanStruct) {
     if (num_objects > 0) {
         int min_width_idx = 0;
@@ -40,7 +45,7 @@ float linear_width_calculator(float side_length, int angle_degrees) {
 /**
  * This function detects objects, their distances and widths.
  */
-void detect_objects(float scan_array_IR[], float scan_array_US[]) {
+void detect_objects(float scan_array_IR[], float scan_array_US[], cyBOT_Scan_t *scanStruct) {  // Does this file know about cyBOT_Scan_t ?
     // Reset the objects_array.
     num_objects = 0;
 
@@ -70,9 +75,9 @@ void detect_objects(float scan_array_IR[], float scan_array_US[]) {
                     // The difference is not too big, so we are still in that same object.
 
                     // Try to save the smallest distance to the object. USE ULTRA-SONIC distance here.
-                    if (next_US_distance < objects_array[num_objects].distance_to_obj) {
-                        objects_array[num_objects].distance_to_obj = next_IR_distance;
-                    }
+//                    if (next_US_distance < objects_array[num_objects].distance_to_obj) {
+//                        objects_array[num_objects].distance_to_obj = next_IR_distance;
+//                    }
 
                     continue;
                 }
@@ -81,6 +86,11 @@ void detect_objects(float scan_array_IR[], float scan_array_US[]) {
                     // Finish the object creation.
                     objects_array[num_objects].end_angle = i * 2 - 2;
                     objects_array[num_objects].radial_width = objects_array[num_objects].end_angle - objects_array[num_objects].start_angle;
+
+                    // New logic of finding the actual distance to object by using US sensor.
+                    int mid_angle = (objects_array[num_objects].end_angle + objects_array[num_objects].start_angle) / 2;
+                    objects_array[num_objects].distance_to_obj = scan_array_US[mid_angle / 2];
+
                     objects_array[num_objects].linear_width = linear_width_calculator(objects_array[num_objects].distance_to_obj, objects_array[num_objects].radial_width);
 
                     // Check if the linear_width is big enough for us so we want to save this object. If big enough - advance num_objects variable.
@@ -91,14 +101,14 @@ void detect_objects(float scan_array_IR[], float scan_array_US[]) {
                     // What if the next distance differs indeed too much but it is still less than limit_distance? Should I create a new object here, as otherwise I will lost this distance reading,
                     // and I will create a new object only during next reading, creating a gap?
                     objects_array[num_objects].start_angle = i * 2;
-                    objects_array[num_objects].distance_to_obj = next_IR_distance;
+                    //objects_array[num_objects].distance_to_obj = next_IR_distance;
                 }
             }
             // We are not during object creation! Create one and start exploring it.
             else {
                 // Create object based on num_objects variable as index of the array
                 objects_array[num_objects].start_angle = i * 2;
-                objects_array[num_objects].distance_to_obj = next_IR_distance;
+                //objects_array[num_objects].distance_to_obj = next_IR_distance;
 
                 in_object = 't';
             }
@@ -110,6 +120,11 @@ void detect_objects(float scan_array_IR[], float scan_array_US[]) {
                 // Finish the object if it is a valid one
                 objects_array[num_objects].end_angle = i * 2 - 2;
                 objects_array[num_objects].radial_width = objects_array[num_objects].end_angle - objects_array[num_objects].start_angle;
+
+                // New logic of finding the actual distance to object by using US sensor.
+                int mid_angle = (objects_array[num_objects].end_angle + objects_array[num_objects].start_angle) / 2;
+                objects_array[num_objects].distance_to_obj = scan_array_US[mid_angle / 2];
+
                 objects_array[num_objects].linear_width = linear_width_calculator(objects_array[num_objects].distance_to_obj, objects_array[num_objects].radial_width);
 
                 // Check if the linear_width is big enough for us so we want to save this object. If big enough - advance num_objects variable.
@@ -133,6 +148,11 @@ void detect_objects(float scan_array_IR[], float scan_array_US[]) {
     if (in_object == 't') {
         objects_array[num_objects].end_angle = 180;
         objects_array[num_objects].radial_width = 180 - objects_array[num_objects].start_angle;
+
+        // New logic of finding the actual distance to object by using US sensor.
+        int mid_angle = (objects_array[num_objects].end_angle + objects_array[num_objects].start_angle) / 2;
+        objects_array[num_objects].distance_to_obj = scan_array_US[mid_angle / 2];
+
         objects_array[num_objects].linear_width = linear_width_calculator(objects_array[num_objects].distance_to_obj, objects_array[num_objects].radial_width);
 
         if (objects_array[num_objects].linear_width > minimal_width && num_objects < 9) {
@@ -187,31 +207,56 @@ void clean_scanner_data(float scan_array[]) {
 /*
  * Perform ultra-sonic scans on 180 degrees range and save distances to scan_array.
  */
+//void perform_scan(float scan_array_US[], float scan_array_IR[], int angle_increment, cyBOT_Scan_t* scanStruct) {
+//    int i, current_angle;
+//
+//    cyBOT_Scan(0, scanStruct);                      // We do one scan at 0 degrees and discard the reading. This is for the sensor to settle at 0.
+//    timer_waitMillis(500);                          // Wait a second before scanning so the roomba gets its rest...
+//
+//    float average_IR = 0;
+//    for (i = 0, current_angle = 0; i < NUM_OF_SCANS; i++, current_angle += angle_increment) {
+//       // Read Ultra-Sonic data scan.
+//       cyBOT_Scan(current_angle, scanStruct);
+//       scan_array_US[i] = scanStruct->sound_dist;      // Save measured US distance to scan_array
+//       average_IR += scanStruct->IR_raw_val;           // Save first IR scan
+//
+//       // Read IR data scan.
+//       scan_array_IR[i] = perform_single_IR_scan(current_angle, scanStruct, average_IR);
+//
+//       // Reset IR accumulator variable.
+//       average_IR = 0;
+//    }
+//}
 void perform_scan(float scan_array_US[], float scan_array_IR[], int angle_increment, cyBOT_Scan_t* scanStruct) {
     int i, current_angle;
 
-    cyBOT_Scan(0, scanStruct);                      // We do one scan at 0 degrees and discard the reading. This is for the sensor to settle at 0.
-    timer_waitMillis(1000);                         // Wait a second before scanning so the roomba gets its rest...
+    cyBOT_Scan(0, scanStruct);
+    timer_waitMillis(500);
 
     for (i = 0, current_angle = 0; i < NUM_OF_SCANS; i++, current_angle += angle_increment) {
-       // Read Ultra-Sonic data scan.
-       cyBOT_Scan(current_angle, scanStruct);
-       scan_array_US[i] = scanStruct->sound_dist;      // *(scan_array + i), Save measured distance to scan_array
+        // 1. Move servo to current_angle and take the first scan
+        cyBOT_Scan(current_angle, scanStruct);
+        float average_IR = scanStruct->IR_raw_val;
 
+        // 2. Take the remaining IR scans (and let the servo finish settling)
+        scan_array_IR[i] = perform_single_IR_scan(current_angle, scanStruct, average_IR);
 
-       // Read IR data scan.
-       scan_array_IR[i] = perform_single_IR_scan(current_angle, scanStruct);
+        // 3. Save the US distance from the LAST scan at this angle (servo is now completely still!)
+        scan_array_US[i] = scanStruct->sound_dist;
+
+        // 4. Wait 20ms so ultrasonic echoes die out before the next angle's ping
+        timer_waitMillis(20);
     }
 }
 
 
-/**
+/*
  * Converts IR voltage to distance based on the equation of best fit.
  * Data is taken from CyBot 3
  */
 float IR_volts_to_dist(float voltage) {
     if (voltage < 620.0f) {
-        return 50.0f;
+        return 200.0f;
     }
 
     return 24151.0f / (voltage - 619.0f);
@@ -221,98 +266,96 @@ float IR_volts_to_dist(float voltage) {
 /*
  * Perform IR scan at a given anlge. Single meaning one direction, not 180 degrees cone.
  */
-float perform_single_IR_scan(int angle, cyBOT_Scan_t* scanStruct) {
-    float average_voltage = 0.0f;
-    int precision = 3;
+float perform_single_IR_scan(int angle, cyBOT_Scan_t* scanStruct, float average_voltage) {
+    int precision = 2;  // Because average_voltage parameter already contains 1 value, actual precision is precision + 1.
 
     int i;
     for (i = 0; i < precision; i++) {
         cyBOT_Scan(angle, scanStruct);
         average_voltage += scanStruct->IR_raw_val;
 
-        timer_waitMillis(2);
+        timer_waitMillis(2);    // Wait a little before every scan.
     }
 
-    average_voltage = average_voltage / precision;
+    average_voltage = average_voltage / (precision + 1);
 
     return IR_volts_to_dist(average_voltage);
 }
 
 
-/*
- * Prints all the data to putty with readings and objects table after a scan and object detection.
+/**
+ * Helper function for request_angle_and_dist that reads characters from PuTTY until Enter ('\r') is pressed
+ * and stores them as a null-terminated string in buffer.
  */
-void send_scan_to_putty(float scan_array_IR[], float scan_array_US[], int angle_increment) {
-    // Print IR header
-    char header1[] = "(IR)Degrees    Distance(cm)\r\n";
+void uart_readLine(char *buffer, int max_length) {
     int i = 0;
+    char c;
 
-    while (header1[i] != '\0') {
-        uart_sendChar(header1[i]);
-        i++;
-    }
-
-    // 1. Print two columns data: Degree | Distance
-    char destination1[50];
-
-    for (i = 0; i < NUM_OF_SCANS; i++) {
-        sprintf(destination1, "%-11d%.1f\r\n", i * angle_increment, scan_array_IR[i]);
-
-        int j = 0;
-        while (destination1[j] != '\0') {
-            uart_sendChar(destination1[j]);
-            j++;
-        }
-    }
-
-    uart_sendChar('\r');
-    uart_sendChar('\n');
-
-    // Print US header
-
-    char header2[] = "(US)Degrees    Distance(cm)\r\n";
-        i = 0;
-
-        while (header2[i] != '\0') {
-            uart_sendChar(header2[i]);
+    // uart_receive() in my_uart.c already echoes characters and '\r\n' to PuTTY!
+    while ((c = uart_receive()) != '\r') {
+        if (i < max_length - 1) {
+            buffer[i] = c;
             i++;
         }
-
-        // 2. Print two columns data: Degree | Distance
-        for (i = 0; i < NUM_OF_SCANS; i++) {
-            sprintf(destination1, "%-11d%.1f\r\n", i * angle_increment, scan_array_US[i]);
-
-            int j = 0;
-            while (destination1[j] != '\0') {
-                uart_sendChar(destination1[j]);
-                j++;
-            }
-        }
-
-        uart_sendChar('\r');
-        uart_sendChar('\n');
-
-    // 2. Print Table with objects data
-
-    // Print the header of the table
-    char header3[] = "Object#  Angle  Distance  Width\r\n";
-
-    i = 0;
-    while (header3[i] != '\0') {
-        uart_sendChar(header3[i]);
-        i++;
     }
 
-    // Print data about each object
-    char destination2[100];
+    buffer[i] = '\0'; // Null-terminate the string
+}
+
+
+/**
+ * Prompts the user in PuTTY for a turn angle and forward distance.
+ */
+void request_angle_and_dist(double *turn_angle, int *distance) {
+    char input_buffer[16];
+
+    // 1. Get angle to turn
+    uart_sendStr("Provide turn angle (90 is forward): ");
+    uart_readLine(input_buffer, sizeof(input_buffer));
+    *turn_angle = atof(input_buffer);
+
+    // 2. Get distance to move forward
+    uart_sendStr("Provide forward distance: ");
+    uart_readLine(input_buffer, sizeof(input_buffer));
+    *distance = atoi(input_buffer);
+}
+
+
+/*
+ * Prints all the data to PuTTY with readings and objects table after a scan and object detection.
+ */
+void send_scan_to_putty(float scan_array_IR[], float scan_array_US[], int angle_increment) {
+    int i;
+    char buffer[100];
+
+    // 1. Print IR Scan Data
+    uart_sendStr("(IR)Degrees    Distance(cm)\r\n");
+
+    for (i = 0; i < NUM_OF_SCANS; i++) {
+        sprintf(buffer, "%-15d%.1f\r\n", i * angle_increment, scan_array_IR[i]);
+        uart_sendStr(buffer);
+    }
+    uart_sendStr("\r\n");
+
+    // 2. Print US Scan Data
+    uart_sendStr("(US)Degrees    Distance(cm)\r\n");
+
+    for (i = 0; i < NUM_OF_SCANS; i++) {
+        sprintf(buffer, "%-15d%.1f\r\n", i * angle_increment, scan_array_US[i]);
+        uart_sendStr(buffer);
+    }
+    uart_sendStr("\r\n");
+
+    // 3. Print Detected Objects Table
+    uart_sendStr("Object#  Angle  Distance  Width\r\n");
 
     for (i = 0; i < num_objects; i++) {
-        sprintf(destination2, "%-9d%-7d%-10.1f%-5.1f\r\n", i + 1, objects_array[i].start_angle, objects_array[i].distance_to_obj, objects_array[i].linear_width);
-
-        int j = 0;
-        while (destination2[j] != '\0') {
-            uart_sendChar(destination2[j]);
-            j++;
-        }
+        int mid_angle = (objects_array[i].start_angle + objects_array[i].end_angle) / 2;
+        sprintf(buffer, "%-9d%-7d%-10.1f%-5.1f\r\n",
+                i + 1,
+                mid_angle, // midpoint angle
+                objects_array[i].distance_to_obj,
+                objects_array[i].linear_width);
+        uart_sendStr(buffer);
     }
 }

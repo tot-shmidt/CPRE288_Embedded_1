@@ -34,7 +34,7 @@ void request_angle_and_dist(double *turn_angle, int *distance) {
 
     crazy_angle_array[i] = '\0';
 
-    // Conver our digit string to a double and put into dereferenced pointer.
+    // Convert our digit string to a double and put into dereferenced pointer.
     *turn_angle = atof(crazy_angle_array);
 
     cyBot_sendByte('\r');
@@ -68,7 +68,7 @@ void request_angle_and_dist(double *turn_angle, int *distance) {
     cyBot_sendByte('\n');
 }
 
-    int main(void) {
+int main(void) {
     oi_t *sensor_data = oi_alloc();
     oi_init(sensor_data);
 

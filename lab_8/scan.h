@@ -33,7 +33,7 @@ int detect_smallest_obj(cyBOT_Scan_t *scanStruct, double *middle_angle, int *dis
 void detect_objects(float scan_array_IR[], float scan_array_US[], cyBOT_Scan_t *scanStruct);
 
 // Print the array from sensor_data.h in the required format to a terminal.
-void display_scan_to_terminal();
+void display_scan_to_terminal(float scan_array_IR[], float scan_array_US[], int angle_increment);
 
 // Clean data which we got from a call to perform_scan().
 void clean_scanner_data(float scan_array[]);

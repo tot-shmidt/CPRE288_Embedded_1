@@ -174,20 +174,6 @@ void detect_objects(float scan_array_IR[], float scan_array_US[], cyBOT_Scan_t *
 }
 
 
-/*
- * Print the array from sensor_data.h in the required format to a terminal.
- */
-void display_scan_to_terminal() {
-    int angle_increase = 2;
-
-    printf("%s %s", "Angle(Degrees)", "Distance(m)\n");
-
-    int i, angle;
-    for (i = 0, angle = 0; i < NUM_OF_SCANS; i++, angle += angle_increase) {
-        printf("%-14d %.2f\n", angle, sensor_data_array[i]);
-    }
-}
-
 
 /**
  * Clean data which we got from a call to perform_scan()
@@ -348,6 +334,59 @@ void request_angle_and_dist(double *turn_angle, int *distance) {
     uart_sendStr("Provide forward distance: ");
     uart_readLine(input_buffer, sizeof(input_buffer));
     *distance = atoi(input_buffer);
+}
+
+
+/*
+ * Print the array from sensor_data.h in the required format to a terminal.
+ */
+void display_scan_to_terminal(float scan_array_IR[], float scan_array_US[], int angle_increment) {
+    int angle_increase = 2;
+
+    printf("%s %s", "Angle(Degrees)", "Distance(m)\n");
+
+    int i, angle;
+    for (i = 0, angle = 0; i < NUM_OF_SCANS; i++, angle += angle_increase) {
+        printf("%-14d %.2f\n", angle, sensor_data_array[i]);
+    }
+
+    //*******************************************************************************
+    int i;
+    char buffer[100];
+
+    // 1. Print IR Scan Data
+    printf("(IR)Degrees    Distance(cm)\n");
+
+    for (i = 0; i < NUM_OF_SCANS; i++) {
+        sprintf(buffer, "%-15d%.1f\n", i * angle_increment, scan_array_IR[i]);
+        printf(buffer);
+    }
+    printf("\n");
+
+    // 2. Print US Scan Data
+    printf("(US)Degrees    Distance(cm)\n");
+
+    for (i = 0; i < NUM_OF_SCANS; i++) {
+        sprintf(buffer, "%-15d%.1f\n", i * angle_increment, scan_array_US[i]);
+        printf(buffer);
+    }
+    printf("\n");
+
+    // 3. Print Detected Objects Table
+    printf("Object#  Angle  Distance  Width\n");
+
+    for (i = 0; i < num_objects; i++) {
+        int mid_angle = (objects_array[i].start_angle + objects_array[i].end_angle) / 2;
+        sprintf(buffer, "%-9d%-7d%-10.1f%-5.1f\r\n",
+                i + 1,
+                mid_angle, // midpoint angle
+                objects_array[i].distance_to_obj,
+                objects_array[i].linear_width);
+        printf(buffer);
+    }
+
+    // 4. Small notice.
+    printf("\nTo get distance from bumper to object, subtract 4 from table distance\n");
 }
 
 

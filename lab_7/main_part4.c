@@ -24,8 +24,8 @@ int main(void) {
     cyBOT_init_Scan(scan_init);
 
     // Servo calibration values
-    right_calibration_value = 259000;           // Servo calibration for 0 degrees
-    left_calibration_value = 1225000;           // Servo calibration for 180 degrees
+    right_calibration_value = 243250;           // Servo calibration for 0 degrees
+    left_calibration_value = 1209250;           // Servo calibration for 180 degrees
 
     int angle_increment = 2;                    // Scan every 2 degrees
     float scan_array_US[NUM_OF_SCANS];          // Ultrasonic distance readings

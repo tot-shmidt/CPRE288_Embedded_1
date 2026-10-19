@@ -158,7 +158,7 @@ void turnToAngle(oi_t *sensor_data, double desiredAngle) {
 void calculate_adjusted_angle(double *sensor_angle, int *dist_to_move) {
     int offset_dist = 14;    // Physical distance from the center of roomba to the sensor(cm).
     int bumper_radius = 17;  // 14 cm (center to sensor) + 3 cm (sensor to front bumper)
-    int safety_margin = 4;   // extra 4 cm before touching the object. Does not have to much above.
+    int safety_margin = 4;   // extra 4 cm before touching the object. Does not have to match 3 cm above.
 
     double sensor_angle_rad = *sensor_angle * (PI / 180.0);
 

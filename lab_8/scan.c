@@ -15,21 +15,33 @@ int num_objects = 0;
 // it is a valid index. But in point_to_smallest_obj I check if (num_objects > 0) but this is incorrect, as what if I have only one object, and its
 // index is 0? Oh, I see. If I successfully create on object, I wll increase num_objects any way to one, right? So this is why I wrote it this way.
 // Do I start from i = 1, as If I have only one object at index 0, the for loop will not execute, and min_width_idx is by default 0, that single objec?
-void point_to_smallest_obj(cyBOT_Scan_t *scanStruct) {
-    if (num_objects > 0) {
-        int min_width_idx = 0;
-
-        int i;
-        for (i = 1; i < num_objects; i++) {
-            if (objects_array[min_width_idx].linear_width > objects_array[i].linear_width) {
-                min_width_idx = i;
-            }
-        }
-
-        int turn_angle = (objects_array[min_width_idx].start_angle + objects_array[min_width_idx].end_angle) / 2;
-
-        cyBOT_Scan(turn_angle, scanStruct);
+int detect_smallest_obj(cyBOT_Scan_t *scanStruct, double *middle_angle, int *dist_to_move) {
+    // 1. If there are 0 objects, nothing to detect, don't enter if statement.
+    if (num_objects <= 0) {
+        return 0;   // No objects found.
     }
+
+    // 2. If here, then I have at least one object detected.
+    int min_width_idx = 0;
+    int i;
+
+    // If there is only one object, num_objects will be 1, so 1 < 1 is false, so min_width_idx stays 0.
+    for (i = 1; i < num_objects; i++) {
+        if (objects_array[min_width_idx].linear_width > objects_array[i].linear_width) {
+            min_width_idx = i;
+        }
+    }
+
+    // Put midle angle and distance to the object into parameter pointers.
+    int calculate_angle = (objects_array[min_width_idx].start_angle + objects_array[min_width_idx].end_angle) / 2;
+
+    *middle_angle = (double) calculate_angle;
+    *dist_to_move = (int) objects_array[min_width_idx].distance_to_obj;
+
+    // Turn the servo to the smallest object.
+    cyBOT_Scan(calculate_angle, scanStruct);
+
+    return 1;   // Angle and distance were assigned.
 }
 
 /**

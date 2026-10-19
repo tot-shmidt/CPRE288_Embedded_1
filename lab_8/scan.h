@@ -26,8 +26,8 @@ struct tall_object {
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-// Points the sensor servo to the smallest width object.
-void point_to_smallest_obj(cyBOT_Scan_t *scanStruct);
+// Returns angle and distance to smalles object. Points the sensor servo to the smallest width object.
+int detect_smallest_obj(cyBOT_Scan_t *scanStruct, double *middle_angle, int *dist_to_move);
 
 // This function detects objects, their distances and widths.
 void detect_objects(float scan_array_IR[], float scan_array_US[], cyBOT_Scan_t *scanStruct);

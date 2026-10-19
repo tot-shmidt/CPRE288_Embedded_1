@@ -181,15 +181,17 @@ void display_scan_to_terminal() {
  * Clean data which we got from a call to perform_scan()
  */
 void clean_scanner_data(float scan_array[]) {
-    float delta_limit = 15;                             // What delta do we consider as an outlier reading
+    float delta_limit = 2.0f;                       // What delta do we consider as an outlier reading
+    float surface_limit = 10.0f;
 
-    float current_distance;                             // Current value from the scan_array
+    float current_distance;                         // Current value from the scan_array
 
+    // First pass.
     int i;
-    for (i = 4; i < NUM_OF_SCANS - 1; i++) {            // we process indexes from 1 to 89, as 0 and 90 don't have prev/next readings.
+    for (i = 4; i < NUM_OF_SCANS - 1; i++) {        // we process indexes from 1 to 89, as 0 and 90 don't have prev/next readings.
         current_distance = scan_array[i];
 
-        // 1. Clean 1: Check for outlier points and normalize them by averaging it to their neighbors
+        // 1. Clean 1: Check for outlier points and normalize them by averaging it to their neighbors.
         if (((current_distance - scan_array[i+1] > delta_limit) && (current_distance - scan_array[i-1] > delta_limit)) ||
             ((scan_array[i+1] - current_distance > delta_limit) && (scan_array[i-1] - current_distance > delta_limit))) {
 
@@ -198,9 +200,22 @@ void clean_scanner_data(float scan_array[]) {
         }
     }
 
+    // Remove weired start readings.
     scan_array[0] = (scan_array[3] + scan_array[4] + scan_array[5]) / 3.0f;
     scan_array[1] = (scan_array[3] + scan_array[4] + scan_array[5]) / 3.0f;
     scan_array[2] = (scan_array[3] + scan_array[4] + scan_array[5]) / 3.0f;
+
+    // Second pass. Smooth flat/curved object surfaces without blurring edges.
+    for (i = 3; i < NUM_OF_SCANS - 1; i++) {
+        float current = scan_array[i];
+        float prev = scan_array[i - 1];
+        float next = scan_array[i + 1];
+
+        // Only smooth if all 3 points are already close to each other (on the same object face).
+        if (fabsf(current - prev) < surface_limit && fabsf(current - next) < surface_limit) {
+            scan_array[i] = (prev + current + next) / 3.0f;
+        }
+    }
 }
 
 
@@ -236,16 +251,19 @@ void perform_scan(float scan_array_US[], float scan_array_IR[], int angle_increm
     for (i = 0, current_angle = 0; i < NUM_OF_SCANS; i++, current_angle += angle_increment) {
         // 1. Move servo to current_angle and take the first scan
         cyBOT_Scan(current_angle, scanStruct);
+
+        float average_US = scanStruct->sound_dist;
         float average_IR = scanStruct->IR_raw_val;
 
         // 2. Take the remaining IR scans (and let the servo finish settling)
         scan_array_IR[i] = perform_single_IR_scan(current_angle, scanStruct, average_IR);
 
-        // 3. Save the US distance from the LAST scan at this angle (servo is now completely still!)
-        scan_array_US[i] = scanStruct->sound_dist;
+        // 3. Save the US distance from the first and last scans at this angle (servo is now completely still!)
+        average_US += scanStruct->sound_dist;
+        scan_array_US[i] = average_US / 2.0f;
 
         // 4. Wait 20ms so ultrasonic echoes die out before the next angle's ping
-        timer_waitMillis(20);
+        timer_waitMillis(10);
     }
 }
 
@@ -255,7 +273,7 @@ void perform_scan(float scan_array_US[], float scan_array_IR[], int angle_increm
  * Data is taken from CyBot 3
  */
 float IR_volts_to_dist(float voltage) {
-    if (voltage < 620.0f) {
+    if (voltage < 740.0f) {
         return 200.0f;
     }
 
@@ -274,7 +292,7 @@ float perform_single_IR_scan(int angle, cyBOT_Scan_t* scanStruct, float average_
         cyBOT_Scan(angle, scanStruct);
         average_voltage += scanStruct->IR_raw_val;
 
-        timer_waitMillis(2);    // Wait a little before every scan.
+        timer_waitMillis(20);    // Wait a little before every scan.
     }
 
     average_voltage = average_voltage / (precision + 1);
@@ -291,7 +309,7 @@ void uart_readLine(char *buffer, int max_length) {
     int i = 0;
     char c;
 
-    // uart_receive() in my_uart.c already echoes characters and '\r\n' to PuTTY!
+    // uart_receive() in my_uart.c already echoes characters and '\r\n' to putty.
     while ((c = uart_receive()) != '\r') {
         if (i < max_length - 1) {
             buffer[i] = c;
@@ -358,4 +376,7 @@ void send_scan_to_putty(float scan_array_IR[], float scan_array_US[], int angle_
                 objects_array[i].linear_width);
         uart_sendStr(buffer);
     }
+
+    // 4. Small notice.
+    uart_sendStr("\nTo get distance from bumper to object, subtract 4 from table distance");
 }

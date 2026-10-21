@@ -32,4 +32,6 @@ void uart_interrupt_init();
 
 void uart_interrupt_handler();
 
+int wait_for_h_or_toggle(void);
+
 #endif /* UART_H_ */

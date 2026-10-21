@@ -72,7 +72,24 @@ void uart_sendStr(const char *data) {
     }
 }
 
-// _PART3
+// Blocking interrupt function for lab 8 part 4 to wait for h in autonomous mode, or change to manual.
+int wait_for_h_or_toggle(void) {
+    uart_sendStr("\r\nPress 'h' to proceed, or 't' to switch to Manual mode.\r\n");
+
+    while (1) {
+        if (flag == 1) {
+            if (uart_data == 't') {
+                return 0; // Leave flag = 1 so main loop toggles mode
+            }
+
+            flag = 0;
+
+            if (uart_data == 'h') {
+                return 1;
+            }
+        }
+    }
+}
 
 
 void uart_interrupt_init() {

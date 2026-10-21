@@ -34,8 +34,9 @@ int main(void) {
     main_init(sensor_data);
 
     int angle_increment = 2;                    // Scan every 2 degrees
-    float scan_array_US[NUM_OF_SCANS];          // Ultrasonic distance readings
-    float scan_array_IR[NUM_OF_SCANS];          // IR distance readings
+
+    static float scan_array_US[NUM_OF_SCANS];          // Ultrasonic distance readings
+    static float scan_array_IR[NUM_OF_SCANS];          // IR distance readings
 
     // Variables for movement
     double angle_to_turn = 0;
@@ -44,14 +45,14 @@ int main(void) {
     // Variables for state control
     int mode = 0;               // 0 = manual, 1 = autonomous
     int target_reached = 0;     // If 1, the cybot is within 5 cm of an object
-    char command;               // Should I declare this here?
+    char command = 0;               // Should I declare this here?
 
     // Debug indicator that CyBot is ready
     uart_sendStr("\r\nReady:\r\n");
 
     while (1) {
         // 1. Check if a new character arrived. Copy it and reset the flag if yes. Also, manage the mode, if necessary.
-        command = 0;    // Reset the command, so we don't go forward on a single press of w, as we can enter mode == 0 again.
+        command = 0;    // Reset the command, so we don't go forward on a single press of w, as we can enter (mode == 0) block again.
 
         if (flag == 1) {
             command = uart_data;
@@ -126,22 +127,22 @@ int main(void) {
             }
 
             // 7. Turn, check how far we are from the 5 cm stopping zone, and move.
-
-            // Wait for 'h' again how they want in the lab specification, then move.
-            while (flag == 0 && uart_data != 'h')
-                ;
-            flag = 0;
-
             turnToAngle(sensor_data, angle_to_turn);
 
             if (dist_to_move <= 0) {
                 target_reached = 1;
-            } else if (dist_to_move > 20) {
-                moveForward(sensor_data, 15, 100);
             } else {
-                moveForward(sensor_data, dist_to_move, 100);
-                target_reached = 1;
-            }
+                int bumped = 0;
+
+                if (dist_to_move > 20) {
+                    bumped = moveForwardWithBump(sensor_data, 15, 100);
+                } else {
+                    bumped = moveForwardWithBump(sensor_data, dist_to_move, 100);
+                    if (!bumped) {
+                        target_reached = 1;
+                    }
+                }
+
 
             // 8. Do something after I reached the object's 5 cm boundary. (Print to LCD).
             if (target_reached) {
@@ -152,6 +153,7 @@ int main(void) {
         }
     }
 
+    }
     oi_free(sensor_data);
     return 0;
 }

@@ -2,6 +2,7 @@
 #include "open_interface.h"
 #include <math.h>
 #include <stdio.h>
+#include "my_uart.h"
 
 #define PI 3.14159265358979323846
 
@@ -34,12 +35,12 @@ void moveForward(oi_t *sensor_data, int distanceCentimeters, short wheelsSpeed) 
 /*
  * This function performs forward movement but with obstacle(bump) detection and go around logic.
  */
-void moveForwardWithBump(oi_t *sensor_data, int distanceCentimeters, short wheelsSpeed) {
+int moveForwardWithBump(oi_t *sensor_data, int distanceCentimeters, short wheelsSpeed) {
     double traveled = 0;        // Is this in millimeters?
-    oi_setWheels(150, 150);
-
-    char bumpReading;
     double distanceMillimeters = distanceCentimeters * 10.0;
+    char bumpReading;
+
+    oi_setWheels(150, 150);
 
     while (traveled < distanceMillimeters) {    // We convert centimeters to millimeters
         oi_update(sensor_data);
@@ -50,25 +51,27 @@ void moveForwardWithBump(oi_t *sensor_data, int distanceCentimeters, short wheel
         // Handle bumps or proceed with forward direction
         if (bumpReading =='\0') {
             traveled = traveled + sensor_data->distance;
-
-        } else if (bumpReading == 'r') {
-            handleBump(sensor_data, 'r', &traveled);
-            bumpReading = '\0';
-            oi_setWheels(150, 150);
-
-        } else if (bumpReading == 'l') {
-            handleBump(sensor_data, 'l', &traveled);
-            bumpReading = '\0';
-            oi_setWheels(150, 150);
-
         } else {
-            printf("%s", "Something went crazy if we are here!");
-        }
+            // Stop moving as we bumped.
+            oi_setWheels(0, 0);
 
+            if (bumpReading == 'r') {
+                uart_sendStr("\r\nRight bumper bumped!\r\n");
+                handleBump(sensor_data, 'r', &traveled);
+            } else if (bumpReading == 'l') {
+                uart_sendStr("\r\nLeft bumper bumped!\r\n");
+                handleBump(sensor_data, 'l', &traveled);
+            }
+
+            return 1;
+        }
     }
 
-    oi_setWheels(0, 0);     // Stop moving, the robot is at its destination
+    // If here, a roomba could finish the whole distance without bumping anything.
+    oi_setWheels(0, 0);
+    return 0;
 }
+
 
 /*
  * Checks both bump sensors and returns a char. 'r' - right bump sensor triggered, 'l' - left sensor triggered.

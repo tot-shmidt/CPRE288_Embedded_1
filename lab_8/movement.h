@@ -9,7 +9,7 @@ struct  oi_t;
 void moveForward(oi_t *sensor_data, int distanceCentimeters, short wheelsSpeed);
 
 // Performs forward movement but with obstacle(bump) detection and go around logic
-void moveForwardWithBump(oi_t *sensor_data, int distanceCentimeters, short wheelsSpeed);
+int moveForwardWithBump(oi_t *sensor_data, int distanceCentimeters, short wheelsSpeed);
 
 // Turns the robot to a certain angle without displacement.
 void turnToAngle(oi_t *sensor_data, double desiredAngle);

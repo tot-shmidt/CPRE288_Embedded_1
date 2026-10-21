@@ -87,11 +87,14 @@ void uart_interrupt_init() {
     IntRegister(INT_UART1, uart_interrupt_handler); //give the microcontroller the address of our interrupt handler - page 104 22 is the vector number
 }
 
+
 void uart_interrupt_handler() {
     // STEP1: Check the Masked Interrup Status
     if ((UART1_MIS_R & 0b1010000) != 0) {
         //STEP2:  Copy the data
         uart_data = UART1_DR_R & 0xFF;
+
+        uart_sendChar(uart_data);   // Echo the data back
 
         //STEP3:  Clear the interrup
         UART1_ICR_R = 0b1010000;

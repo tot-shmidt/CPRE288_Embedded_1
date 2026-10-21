@@ -341,14 +341,14 @@ void request_angle_and_dist(double *turn_angle, int *distance) {
  * Print the array from sensor_data.h in the required format to a terminal.
  */
 void display_scan_to_terminal(float scan_array_IR[], float scan_array_US[], int angle_increment) {
-    int angle_increase = 2;
-
-    printf("%s %s", "Angle(Degrees)", "Distance(m)\n");
-
-    int i, angle;
-    for (i = 0, angle = 0; i < NUM_OF_SCANS; i++, angle += angle_increase) {
-        printf("%-14d %.2f\n", angle, sensor_data_array[i]);
-    }
+//    int angle_increase = 2;
+//
+//    printf("%s %s", "Angle(Degrees)", "Distance(m)\n");
+//
+//    int i, angle;
+//    for (i = 0, angle = 0; i < NUM_OF_SCANS; i++, angle += angle_increase) {
+//        printf("%-14d %.2f\n", angle, sensor_data_array[i]);
+//    }
 
     //*******************************************************************************
     int i;
@@ -386,7 +386,7 @@ void display_scan_to_terminal(float scan_array_IR[], float scan_array_US[], int 
     }
 
     // 4. Small notice.
-    printf("\nTo get distance from bumper to object, subtract 4 from table distance\n");
+    printf("%s", "\nTo get distance from bumper to object, subtract 4 from table distance\n");
 }
 
 

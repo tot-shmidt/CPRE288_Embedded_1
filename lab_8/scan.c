@@ -66,7 +66,7 @@ void detect_objects(float scan_array_IR[], float scan_array_US[], cyBOT_Scan_t *
     float limit_distance = 60;      // In cantimeters.
     float delta_limit = 10;         // In cantimeters.
     char in_object = 'f';
-    char minimal_width = 2;         // In cantimeters.
+    short minimal_width = 3;         // In cantimeters.
 
     int i;
     for (i = 0; i < NUM_OF_SCANS; i++) {
@@ -204,16 +204,16 @@ void clean_scanner_data(float scan_array[]) {
     scan_array[2] = (scan_array[3] + scan_array[4] + scan_array[5]) / 3.0f;
 
     // Second pass. Smooth flat/curved object surfaces without blurring edges.
-    for (i = 3; i < NUM_OF_SCANS - 1; i++) {
-        float current = scan_array[i];
-        float prev = scan_array[i - 1];
-        float next = scan_array[i + 1];
-
-        // Only smooth if all 3 points are already close to each other (on the same object face).
-        if (fabsf(current - prev) < surface_limit && fabsf(current - next) < surface_limit) {
-            scan_array[i] = (prev + current + next) / 3.0f;
-        }
-    }
+//    for (i = 3; i < NUM_OF_SCANS - 1; i++) {
+//        float current = scan_array[i];
+//        float prev = scan_array[i - 1];
+//        float next = scan_array[i + 1];
+//
+//        // Only smooth if all 3 points are already close to each other (on the same object face).
+//        if (fabsf(current - prev) < surface_limit && fabsf(current - next) < surface_limit) {
+//            scan_array[i] = (prev + current + next) / 3.0f;
+//        }
+//    }
 }
 
 
@@ -249,6 +249,8 @@ void perform_scan(float scan_array_US[], float scan_array_IR[], int angle_increm
     for (i = 0, current_angle = 0; i < NUM_OF_SCANS; i++, current_angle += angle_increment) {
         // 1. Move servo to current_angle and take the first scan
         cyBOT_Scan(current_angle, scanStruct);
+        timer_waitMillis(20);
+        cyBOT_Scan(current_angle, scanStruct);
 
         float average_US = scanStruct->sound_dist;
         float average_IR = scanStruct->IR_raw_val;
@@ -283,7 +285,7 @@ float IR_volts_to_dist(float voltage) {
  * Perform IR scan at a given anlge. Single meaning one direction, not 180 degrees cone.
  */
 float perform_single_IR_scan(int angle, cyBOT_Scan_t* scanStruct, float average_voltage) {
-    int precision = 2;  // Because average_voltage parameter already contains 1 value, actual precision is precision + 1.
+    int precision = 1;  // Because average_voltage parameter already contains 1 value, actual precision is precision + 1.
 
     int i;
     for (i = 0; i < precision; i++) {
@@ -429,5 +431,5 @@ void send_scan_to_putty(float scan_array_IR[], float scan_array_US[], int angle_
     }
 
     // 4. Small notice.
-    uart_sendStr("\nTo get distance from bumper to object, subtract 4 from table distance");
+   // uart_sendStr("\nTo get distance from bumper to object, subtract 4 from table distance");
 }

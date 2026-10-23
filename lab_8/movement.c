@@ -93,9 +93,9 @@ char checkBump(oi_t *sensor_data) {
 void handleBump(oi_t *sensor_data, char sensorTriggered, double *traveled) {
     int backupDistance = -15;
     short backupSpeed = -100;
-    double desiredAngle = 90;
+    double desiredAngle = 45;
     int lateralDistance = 25;
-    short lateralSpeed = 150;
+    short lateralSpeed = 100;
 
     // Backup for backupDistance
     moveForward(sensor_data, backupDistance, backupSpeed);

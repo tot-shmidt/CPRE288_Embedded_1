@@ -71,9 +71,9 @@ int main(void) {
         // 2. If manual driving mode is set:
         if (mode == 0) {
             if (command == 'w') {
-                moveForward(sensor_data, 5, 150);
+                moveForward(sensor_data, 5, 100);
             } else if (command == 's') {
-                moveForward(sensor_data, -5, -150);
+                moveForward(sensor_data, -5, -100);
             } else if (command == 'a') {
                 turnToAngle(sensor_data, 10);
             } else if (command == 'd') {
@@ -135,7 +135,7 @@ int main(void) {
                 int bumped = 0;
 
                 if (dist_to_move > 20) {
-                    bumped = moveForwardWithBump(sensor_data, 15, 100);
+                    bumped = moveForwardWithBump(sensor_data, 20, 100);
                 } else {
                     bumped = moveForwardWithBump(sensor_data, dist_to_move, 100);
                     if (!bumped) {

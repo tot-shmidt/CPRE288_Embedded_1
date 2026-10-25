@@ -6,8 +6,8 @@
  *              extra help with formatting their code.
 */
 
-#ifndef UART_H_
-#define UART_H_
+#ifndef MY_UART_H_
+#define MY_UART_H_
 
 #include <stdint.h>
 #include <stdbool.h>

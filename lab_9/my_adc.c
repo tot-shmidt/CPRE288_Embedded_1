@@ -45,7 +45,7 @@ void adc_init() {
 /*
  * Get one scan value
  */
-int adc_read() {
+float adc_read() {
     int scan_voltage = 0;                   // Here the raw valtage will be stored from a scan.
     ADC0_PSSI_R = 0b01;                     // Write 1 to begin sampling on Samle Squencer 0.
 
@@ -56,5 +56,5 @@ int adc_read() {
 
     scan_voltage = ADC0_SSFIFO0_R & 0xFFF;  // Do I need to mask lower 12 bits of the FIFO register?
 
-    return scan_voltage;
+    return ((float) scan_voltage);
 }

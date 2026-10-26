@@ -3,6 +3,6 @@
 
 void adc_init();
 
-int adc_read();
+float adc_read();
 
 #endif

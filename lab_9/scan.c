@@ -5,6 +5,7 @@
 #include "my_uart.h"
 #include <stdlib.h>
 #include "cyBot_Scan.h"
+#include "my_adc.h"
 
 
 // This is where we store our objects after every scan and calculation.
@@ -247,22 +248,23 @@ void perform_scan(float scan_array_US[], float scan_array_IR[], int angle_increm
     timer_waitMillis(500);
 
     for (i = 0, current_angle = 0; i < NUM_OF_SCANS; i++, current_angle += angle_increment) {
-        // 1. Move servo to current_angle and take the first scan
+        // 1. Move servo to the new current_angle and take the first scan.
+//        cyBOT_Scan(current_angle, scanStruct);
+//        timer_waitMillis(20);
         cyBOT_Scan(current_angle, scanStruct);
-        timer_waitMillis(20);
-        cyBOT_Scan(current_angle, scanStruct);
-
         float average_US = scanStruct->sound_dist;
-        float average_IR = scanStruct->IR_raw_val;
 
-        // 2. Take the remaining IR scans (and let the servo finish settling)
-        scan_array_IR[i] = perform_single_IR_scan(current_angle, scanStruct, average_IR);
+        // 2. Save the distance from the minimal adc voltage value, collected from perform_single_IR_scan.
+        float minimum_IR = perform_single_IR_scan();
+        scan_array_IR[i] = minimum_IR;
 
-        // 3. Save the US distance from the first and last scans at this angle (servo is now completely still!)
+        // 3. Save the US distance from the first and second scans at this angle.
+        timer_waitMillis(10);
+        cyBOT_Scan(current_angle, scanStruct);
         average_US += scanStruct->sound_dist;
         scan_array_US[i] = average_US / 2.0f;
 
-        // 4. Wait 20ms so ultrasonic echoes die out before the next angle's ping
+        // 4. Wait 10ms so ultrasonic echoes die out before the next angle's ping
         timer_waitMillis(10);
     }
 }
@@ -273,31 +275,34 @@ void perform_scan(float scan_array_US[], float scan_array_IR[], int angle_increm
  * Data is taken from CyBot 3
  */
 float IR_volts_to_dist(float voltage) {
-    if (voltage < 740.0f) {
+    if (voltage < 700.0f) {
         return 200.0f;
     }
 
-    return 24151.0f / (voltage - 619.0f);
+    return 103300.252f * powf(voltage, -1.15985f);
 }
 
 
 /*
  * Perform IR scan at a given anlge. Single meaning one direction, not 180 degrees cone.
  */
-float perform_single_IR_scan(int angle, cyBOT_Scan_t* scanStruct, float average_voltage) {
-    int precision = 1;  // Because average_voltage parameter already contains 1 value, actual precision is precision + 1.
+float perform_single_IR_scan() {
+    int precision = 3;  // Because average_voltage parameter already contains 1 value, actual precision is precision + 1.
 
     int i;
-    for (i = 0; i < precision; i++) {
-        cyBOT_Scan(angle, scanStruct);
-        average_voltage += scanStruct->IR_raw_val;
+    int minimal_voltage = adc_read();       // Take first IR measurment and let it be the minimum value seen so far.
 
-        timer_waitMillis(20);    // Wait a little before every scan.
+    for (i = 0; i < precision - 1; i++) {   // We do -1 as before the loop there is already one scan made
+        int reading = adc_read();
+
+        if (reading < minimal_voltage) {
+            minimal_voltage = reading;      // The goal is to save the lowest reading, as distance was calibrated in this way.
+        }
+
+        timer_waitMillis(10);               // Wait a little before every scan.
     }
 
-    average_voltage = average_voltage / (precision + 1);
-
-    return IR_volts_to_dist(average_voltage);
+    return IR_volts_to_dist(minimal_voltage);
 }
 
 

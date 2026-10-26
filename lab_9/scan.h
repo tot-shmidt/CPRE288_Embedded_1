@@ -42,7 +42,10 @@ void clean_scanner_data(float scan_array[]);
 void perform_scan(float scan_array_US[], float scan_array_IR[], int angle_increment, cyBOT_Scan_t* scanStruct);
 
 // Perform IR scan at a given angle. Not 180 degrees.
-float perform_single_IR_scan(int angle, cyBOT_Scan_t* scanStruct, float average_voltage);
+float perform_single_IR_scan();
+
+// Convert ADC voltage to distance by using power regression from desmos.
+float IR_volts_to_dist(float voltage);
 
 // Sends to column data (angle - distance) and table of objects to PuTTy.
 void send_scan_to_putty(float scan_array_IR[], float scan_array_US[], int angle_increment);

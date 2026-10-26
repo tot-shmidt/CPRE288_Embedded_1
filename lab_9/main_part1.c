@@ -33,9 +33,9 @@ int main(void) {
         if (input == 's') {
             uart_sendStr("\r\n");
 
-            int voltage = adc_read();
+            float voltage = adc_read();
 
-            sprintf(buffer, "Read: %d", voltage);
+            sprintf(buffer, "Read: %.1f", voltage);
 
             lcd_printf(buffer);
 

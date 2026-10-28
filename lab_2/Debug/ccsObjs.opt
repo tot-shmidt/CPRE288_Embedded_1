@@ -1,6 +1,6 @@
+"./Simple-CyBot-echo.obj"
 "./Timer.obj"
 "./lcd.obj"
-"./main.obj"
 "./movement.obj"
 "./open_interface.obj"
 "./tm4c123gh6pm_startup_ccs.obj"

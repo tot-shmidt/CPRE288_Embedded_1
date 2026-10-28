@@ -288,18 +288,19 @@ float IR_volts_to_dist(float voltage) {
  */
 float perform_single_IR_scan() {
     int precision = 3;  // Because average_voltage parameter already contains 1 value, actual precision is precision + 1.
-
     int i;
+
     int minimal_voltage = adc_read();       // Take first IR measurment and let it be the minimum value seen so far.
 
     for (i = 0; i < precision - 1; i++) {   // We do -1 as before the loop there is already one scan made
+        timer_waitMillis(10);               // Wait a little before every scan.
+
         int reading = adc_read();
 
         if (reading < minimal_voltage) {
             minimal_voltage = reading;      // The goal is to save the lowest reading, as distance was calibrated in this way.
         }
 
-        timer_waitMillis(10);               // Wait a little before every scan.
     }
 
     return IR_volts_to_dist(minimal_voltage);
@@ -434,6 +435,9 @@ void send_scan_to_putty(float scan_array_IR[], float scan_array_US[], int angle_
                 objects_array[i].linear_width);
         uart_sendStr(buffer);
     }
+
+    // END for python script
+    uart_sendStr("END\n");
 
     // 4. Small notice.
    // uart_sendStr("\nTo get distance from bumper to object, subtract 4 from table distance");

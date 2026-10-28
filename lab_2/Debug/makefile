@@ -10,9 +10,9 @@ GEN_OPTS__FLAG :=
 GEN_CMDS__FLAG := 
 
 ORDERED_OBJS += \
+"./Simple-CyBot-echo.obj" \
 "./Timer.obj" \
 "./lcd.obj" \
-"./main.obj" \
 "./movement.obj" \
 "./open_interface.obj" \
 "./tm4c123gh6pm_startup_ccs.obj" \
@@ -148,8 +148,8 @@ lab_2.out: $(OBJS) $(CMD_SRCS) $(LIB_SRCS) $(GEN_CMDS)
 # Other Targets
 clean:
 	-$(RM) $(EXE_OUTPUTS__QUOTED)
-	-$(RM) "Timer.obj" "lcd.obj" "main.obj" "movement.obj" "open_interface.obj" "tm4c123gh6pm_startup_ccs.obj" 
-	-$(RM) "Timer.d" "lcd.d" "main.d" "movement.d" "open_interface.d" "tm4c123gh6pm_startup_ccs.d" 
+	-$(RM) "Simple-CyBot-echo.obj" "Timer.obj" "lcd.obj" "movement.obj" "open_interface.obj" "tm4c123gh6pm_startup_ccs.obj" 
+	-$(RM) "Simple-CyBot-echo.d" "Timer.d" "lcd.d" "movement.d" "open_interface.d" "tm4c123gh6pm_startup_ccs.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 

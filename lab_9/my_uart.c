@@ -72,9 +72,32 @@ void uart_sendStr(const char *data) {
     }
 }
 
+
+// FOR PUTTY!!!! ///////
+
 // Blocking interrupt function for lab 8 part 4 to wait for h in autonomous mode, or change to manual.
+//int wait_for_h_or_toggle(void) {
+//    uart_sendStr("\r\nPress 'h' to proceed, or 't' to switch to Manual mode.\r\n");
+//
+//    while (1) {
+//        if (flag == 1) {
+//            if (uart_data == 't') {
+//                return 0; // Leave flag = 1 so main loop toggles mode
+//            }
+//
+//            flag = 0;
+//
+//            if (uart_data == 'h') {
+//                return 1;
+//            }
+//        }
+//    }
+//}
+
+//  !!!!!!!!!!!!!!   FOR PYTHON !!!!!!!!!!!!
+
 int wait_for_h_or_toggle(void) {
-    uart_sendStr("\r\nPress 'h' to proceed, or 't' to switch to Manual mode.\r\n");
+    //uart_sendStr("Press 'h' to proceed, or 't' to switch to Manual mode.\n");
 
     while (1) {
         if (flag == 1) {
@@ -104,18 +127,38 @@ void uart_interrupt_init() {
     IntRegister(INT_UART1, uart_interrupt_handler); //give the microcontroller the address of our interrupt handler - page 104 22 is the vector number
 }
 
+// !!!!!! FOR PUTTY !!!!!!!!!!!
 
+//void uart_interrupt_handler() {
+//    // STEP1: Check the Masked Interrup Status
+//    if ((UART1_MIS_R & 0b1010000) != 0) {
+//        //STEP2:  Copy the data
+//        uart_data = UART1_DR_R & 0xFF;
+//
+//        uart_sendChar(uart_data);   // Echo the data back
+//
+//        //STEP3:  Clear the interrup
+//        UART1_ICR_R = 0b1010000;
+//
+//        flag = 1;
+//    }
+//}
+
+
+// !!!! FOR PYTHON !!!!!!!!!!!!!!!
 void uart_interrupt_handler() {
-    // STEP1: Check the Masked Interrup Status
+    // STEP 1: Check the Masked Interrupt Status
     if ((UART1_MIS_R & 0b1010000) != 0) {
-        //STEP2:  Copy the data
-        uart_data = UART1_DR_R & 0xFF;
+        // STEP 2: Read the byte from hardware
+        char incoming = UART1_DR_R & 0xFF;
 
-        uart_sendChar(uart_data);   // Echo the data back
-
-        //STEP3:  Clear the interrup
+        // STEP 3: Clear the interrupt
         UART1_ICR_R = 0b1010000;
 
-        flag = 1;
+        // Ignore trailing '\r' or '\n' sent by the Python client's input()
+        if (incoming != '\r' && incoming != '\n') {
+            uart_data = incoming;
+            flag = 1;
+        }
     }
 }

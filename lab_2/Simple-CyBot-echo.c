@@ -45,14 +45,18 @@ int main (void) {
 
     // Send a response to the Client (Starter Client expects the response to end with \n)
     // In this case I am just sending back the first byte of the command received and a '\n'
-    cyBot_sendByte(command[0]);
+    int i = 0;
+    while (command[i] != '\0'){
+        cyBot_sendByte(command[i]);
+        i++;
+    }
 
     // Only send a '\n' if the first byte of the command is not a '\n',
     // to avoid sending back-to-back '\n' to the client
-    if(command[0] != '\n')
-    {
-      cyBot_sendByte('\n');
-    }
+//    if(command[0] != '\n')
+//    {
+//      cyBot_sendByte('\n');
+//    }
 
   }
  

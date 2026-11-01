@@ -5,5 +5,7 @@ void ping_init();
 
 int ping_read();
 
+void ping_interrupt_handler();
+
 
 #endif

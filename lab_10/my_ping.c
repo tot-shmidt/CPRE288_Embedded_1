@@ -37,7 +37,7 @@ void ping_init() {
     IntRegister(52, ping_interrupt_handler);    // Register the ISR.
 }
 
-int ping_read() {
+int ping_read(int *cycles_num, float *time_ms) {
     // Reset GPIO to output to send initial signal
     TIMER3_CTL_R &= ~0x100;             // Disable timer so it does not capture triggers (Do I need this, considering that the pin is output now)?
     GPIO_PORTB_AFSEL_R &= ~0b1000;      // Disable alternative function
@@ -62,10 +62,15 @@ int ping_read() {
     while (ping_done != 2)                                   // Wait until ISR increases done to 2.
         ;
 
-    unsigned int time_difference = (rising_time - falling_time) & 0xFFFFFF;   // If here, then 2 edges were captured.
+    unsigned int cycles_difference = (rising_time - falling_time) & 0xFFFFFF;   // If here, then 2 edges were captured.
+    // unsigned int distance = (((cycles_difference / 16000000f) / 2) * 343) * 100;  // find total time in sec to one sid, then to one side, myltiply by speed of sound (m/s), convert to cm.
+    unsigned int distance = (cycles_difference * 343) / 320000;
+    // time = cycles / clock frequency
 
+    *cycles_num = cycles_difference;
+    *time_ms = (cycles_difference / 16000f);     // in milliseconds. Round trip.
 
-    return time_difference;
+    return distance;
 }
 
 

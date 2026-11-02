@@ -1,7 +1,9 @@
-#include "my_ping.h"
-#include <inc/tm4c123gh6pm.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include "driverlib/interrupt.h"
+#include <inc/tm4c123gh6pm.h>
 #include "Timer.h"
+#include "my_ping.h"
 
 volatile int ping_done = 0;                 // Flag for ISR to increment.
 volatile unsigned int rising_time = 0;
@@ -63,7 +65,7 @@ int ping_read() {
     unsigned int time_difference = (rising_time - falling_time) & 0xFFFFFF;   // If here, then 2 edges were captured.
 
 
-    return 0;
+    return time_difference;
 }
 
 

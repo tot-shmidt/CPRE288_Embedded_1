@@ -131,6 +131,7 @@ int main(void) {
                 uart_sendStr("Arrived within 5 cm of smallest object!\r\n");
                 uart_sendStr("END\n");
                 lcd_printf("Target Reached!");
+                mode = 0;
                 continue;
             }
 

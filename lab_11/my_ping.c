@@ -68,7 +68,7 @@ int ping_read(int *cycles_num, float *time_ms) {
     // time = cycles / clock frequency
 
     *cycles_num = cycles_difference;
-    *time_ms = (cycles_difference / 16000f);     // in milliseconds. Round trip.
+    *time_ms = (cycles_difference / 16000.0f);     // in milliseconds. Round trip.
 
     return distance;
 }

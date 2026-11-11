@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include "cyBot_Scan.h"
 #include "my_adc.h"
+#include "my_ping.h"
+#include "servo.h"
 
 
 // This is where we store our objects after every scan and calculation.
@@ -251,8 +253,11 @@ void perform_scan(float scan_array_US[], float scan_array_IR[], int angle_increm
         // 1. Move servo to the new current_angle and take the first scan.
 //        cyBOT_Scan(current_angle, scanStruct);
 //        timer_waitMillis(20);
-        cyBOT_Scan(current_angle, scanStruct);
-        float average_US = scanStruct->sound_dist;
+
+//        cyBOT_Scan(current_angle, scanStruct);
+//        float average_US = scanStruct->sound_dist;
+        servo_move(current_anle);
+        float average_US = ping_read()
 
         // 2. Save the distance from the minimal adc voltage value, collected from perform_single_IR_scan.
         float minimum_IR = perform_single_IR_scan();

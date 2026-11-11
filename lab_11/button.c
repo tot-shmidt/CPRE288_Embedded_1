@@ -85,7 +85,7 @@ void init_button_interrupts() {
     NVIC_EN0_R |= 0x00000010;           // 0b0000 .. 0001 0000 - PORTE has interrupt number 4, which is the fifth bit.
 
     // Bind the interrupt to the handler.
-    IntRegister(INT_GPIOE, gpioe_handler2);
+    IntRegister(INT_GPIOE, gpioe_handler1);
 }
 
 

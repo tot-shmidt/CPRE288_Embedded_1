@@ -2,7 +2,7 @@
 #include "Timer.h"
 #include <math.h>
 
-static int servo_angle = 0;         // Tracks current angle to properly calculate delay for servo to reach its destination
+int servo_angle = 0;                         // Tracks current angle to properly calculate delay for servo to reach its destination
 
 // These two must be assigned in main before call to servo_init().
 unsigned int zero_deg_match_val = 0;         // PWM match value to send servo to 0 degrees
@@ -45,21 +45,24 @@ int servo_move(float degrees) {
     float cycles_per_angle = (zero_deg_match_val - oneEighty_deg_match_val) / 180.0f;
 
     // Check that degrees in not out of bounds.
-    if (degrees > 180 || degrees < 0)
-        return 1;
+    if (degrees > 180.0f) {
+        degrees = 180.0f;
+    } else if (degrees < 0.0f) {
+        degrees = 0.0f;
+    }
 
     // Find new match value.
-    int new_match_val = (zero_deg_match_val - (degrees * cycles_per_angle));
+    int new_match_val = (int) (zero_deg_match_val - (degrees * cycles_per_angle));
 
     // Assigned new PWM match value to send the servo to desired angle.
     TIMER1_TBMATCHR_R = new_match_val & 0xFFFF;
     TIMER1_TBPMR_R    = new_match_val >> 16;
 
     // Calculate time to wait until the servo finishes its movement.
-    timer_waitMillis(abs(servo_angle - degrees) * 20 + 20);
+    timer_waitMillis(abs(servo_angle - degrees) * 5 + 20);
 
     // Update current angle of the servo
-    servo_angle = degrees;
+    servo_angle = (int) degrees;
 
     // I am not sure what to return.
     return new_match_val;
